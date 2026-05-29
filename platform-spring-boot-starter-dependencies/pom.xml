@@ -11,10 +11,10 @@
     <description>Bill of materials (BOM) for Spring Boot starters</description>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>26</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.source>26</maven.compiler.source>
+        <maven.compiler.target>26</maven.compiler.target>
 
         <platform.version>1.0.0-SNAPSHOT</platform.version>
 
