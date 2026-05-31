@@ -1,0 +1,153 @@
+{
+  "groups": [
+    {
+      "name": "platform.rest.client.clients",
+      "type": "java.util.Map<java.lang.String,com.kevshah.platform.starter.rest.client.config.ClientProperties>",
+      "description": "Named REST client configurations. Each key is the logical client name."
+    }
+  ],
+  "properties": [
+    {
+      "name": "platform.rest.client.clients[*].base-url",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.ClientProperties",
+      "description": "Base URL of the external service (e.g. https://payment.example.com)."
+    },
+    {
+      "name": "platform.rest.client.clients[*].default-content-type",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.ClientProperties",
+      "description": "Default Content-Type header applied to every request made by this client."
+    },
+    {
+      "name": "platform.rest.client.clients[*].default-accept",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.ClientProperties",
+      "description": "Default Accept header applied to every request made by this client."
+    },
+    {
+      "name": "platform.rest.client.clients[*].default-query-params",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.ClientProperties",
+      "description": "Default query parameters appended to every request made by this client."
+    },
+    {
+      "name": "platform.rest.client.clients[*].connect-timeout",
+      "type": "java.time.Duration",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.ClientProperties",
+      "description": "Connection timeout for establishing a TCP connection to the remote host."
+    },
+    {
+      "name": "platform.rest.client.clients[*].read-timeout",
+      "type": "java.time.Duration",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.ClientProperties",
+      "description": "Read timeout for waiting for a response after the connection is established."
+    },
+    {
+      "name": "platform.rest.client.clients[*].endpoints",
+      "type": "java.util.Map<java.lang.String,com.kevshah.platform.starter.rest.client.config.EndpointProperties>",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.ClientProperties",
+      "description": "Named endpoint definitions. Each key becomes the logical endpoint name."
+    },
+    {
+      "name": "platform.rest.client.clients[*].endpoints[*].method",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.EndpointProperties",
+      "description": "HTTP method for this endpoint (e.g. GET, POST, PUT, PATCH, DELETE)."
+    },
+    {
+      "name": "platform.rest.client.clients[*].endpoints[*].path",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.EndpointProperties",
+      "description": "URL path relative to the client's base-url. May contain URI template variables such as /api/v1/payments/{id}."
+    },
+    {
+      "name": "platform.rest.client.clients[*].endpoints[*].default-query-params",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.EndpointProperties",
+      "description": "Default query parameters for this specific endpoint, merged on top of client-level default-query-params."
+    },
+    {
+      "name": "platform.rest.client.clients[*].endpoints[*].content-type",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.EndpointProperties",
+      "description": "Content-Type header override for this endpoint. Takes precedence over the client-level default-content-type."
+    },
+    {
+      "name": "platform.rest.client.clients[*].endpoints[*].accept",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.EndpointProperties",
+      "description": "Accept header override for this endpoint. Takes precedence over the client-level default-accept."
+    },
+    {
+      "name": "platform.rest.client.clients[*].retry.max-attempts",
+      "type": "java.lang.Integer",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.RetryProperties",
+      "description": "Total number of attempts (including the first). Defaults to 3 when omitted.",
+      "defaultValue": 3
+    },
+    {
+      "name": "platform.rest.client.clients[*].retry.wait-duration",
+      "type": "java.time.Duration",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.RetryProperties",
+      "description": "Base wait duration between retry attempts. Defaults to 500ms when omitted.",
+      "defaultValue": "500ms"
+    },
+    {
+      "name": "platform.rest.client.clients[*].retry.multiplier",
+      "type": "java.lang.Double",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.RetryProperties",
+      "description": "Multiplier for exponential back-off. Values greater than 1.0 enable exponential back-off. Defaults to 1.0 (fixed back-off).",
+      "defaultValue": 1.0
+    },
+    {
+      "name": "platform.rest.client.clients[*].retry.max-wait-duration",
+      "type": "java.time.Duration",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.RetryProperties",
+      "description": "Maximum wait duration cap when exponential back-off is active. Ignored when multiplier is 1.0 or absent."
+    },
+    {
+      "name": "platform.rest.client.clients[*].retry.retry-on-response-statuses",
+      "type": "java.util.List<java.lang.Integer>",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.RetryProperties",
+      "description": "HTTP response status codes that should trigger a retry (e.g. 429, 503, 504)."
+    },
+    {
+      "name": "platform.rest.client.clients[*].ssl.bundle",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.client.config.SslProperties",
+      "description": "Name of the SSL bundle (as configured under spring.ssl.bundle.*) to apply to this client's connections."
+    }
+  ],
+  "hints": [
+    {
+      "name": "platform.rest.client.clients[*].endpoints[*].method",
+      "values": [
+        { "value": "GET" },
+        { "value": "POST" },
+        { "value": "PUT" },
+        { "value": "PATCH" },
+        { "value": "DELETE" },
+        { "value": "HEAD" },
+        { "value": "OPTIONS" }
+      ]
+    },
+    {
+      "name": "platform.rest.client.clients[*].default-content-type",
+      "values": [
+        { "value": "application/json" },
+        { "value": "application/xml" },
+        { "value": "application/x-www-form-urlencoded" }
+      ]
+    },
+    {
+      "name": "platform.rest.client.clients[*].default-accept",
+      "values": [
+        { "value": "application/json" },
+        { "value": "application/xml" },
+        { "value": "*/*" }
+      ]
+    }
+  ]
+}
+

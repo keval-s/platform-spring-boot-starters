@@ -61,6 +61,11 @@
             <!--Custom starters-->
             <dependency>
                 <groupId>com.kevshah</groupId>
+                <artifactId>platform-spring-boot-starter-rest-client</artifactId>
+                <version>${platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.kevshah</groupId>
                 <artifactId>platform-spring-boot-starter-rest-server</artifactId>
                 <version>${platform.version}</version>
             </dependency>

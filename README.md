@@ -23,6 +23,7 @@ platform-spring-boot-starters/
 ├── platform-spring-boot-starter-parent/          # Consumer-facing parent POM
 ├── platform-spring-boot-starter-build-parent/    # Internal build parent POM
 ├── starters/                                      # Auto-configuration starter modules
+│   ├── platform-spring-boot-starter-rest-client/ # REST client starter
 │   └── platform-spring-boot-starter-rest-server/ # REST server starter
 └── examples/                                      # Runnable example applications
     └── restful-web-service-example/               # Example RESTful web service
@@ -42,6 +43,7 @@ platform-spring-boot-starters/
 
 | Artifact ID | Description |
 |---|---|
+| `platform-spring-boot-starter-rest-client` | Auto-configures named REST clients backed by Spring's RestClient with retry and SSL support. |
 | `platform-spring-boot-starter-rest-server` | Auto-configures REST server concerns: request/response logging with per-path rules. |
 
 ### Examples

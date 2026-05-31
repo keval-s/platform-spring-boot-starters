@@ -23,6 +23,7 @@
         <module>platform-spring-boot-starter-parent</module>
         <module>platform-spring-boot-starter-build-parent</module>
 
+        <module>starters/platform-spring-boot-starter-rest-client</module>
         <module>starters/platform-spring-boot-starter-rest-server</module>
     </modules>
 

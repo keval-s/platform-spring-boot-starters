@@ -13,11 +13,12 @@ for platform services.
 
 ```
 platform-spring-boot-starters/
-├── platform-spring-boot-starter-dependencies/   # BOM — centralised dependency versions
-├── platform-spring-boot-starter-parent/          # Consumer-facing parent POM
-├── platform-spring-boot-starter-build-parent/    # Internal build parent (used by starters)
+├── platform-spring-boot-starter-dependencies/     # BOM — centralised dependency versions
+├── platform-spring-boot-starter-parent/           # Consumer-facing parent POM
+├── platform-spring-boot-starter-build-parent/     # Internal build parent (used by starters)
 ├── starters/                                      # Auto-configuration starter modules
-│   └── platform-spring-boot-starter-rest-server/
+│   ├── platform-spring-boot-starter-rest-server/  
+│   └── platform-spring-boot-starter-rest-client/  
 ├── examples/                                      # Runnable example applications
 │   └── restful-web-service-example/
 └── .agents/
