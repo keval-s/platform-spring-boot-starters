@@ -165,6 +165,39 @@ Javadoc comment. Do **not** place a separate Javadoc comment on the individual r
 public record TimeoutProperties(int connectTimeoutMs, int readTimeoutMs) {}
 ```
 
+### Javadoc for public methods
+
+Every public method must have a `///` Javadoc comment. Use the following structure:
+
+1. **Summary sentence** — one line describing what the method does. Start with a third-person
+   verb (e.g., *Returns*, *Registers*, *Builds*).
+2. **Optional detail paragraph** — separated by a blank `///` line, providing additional
+   context when the summary alone is insufficient.
+3. **`@param` tags** — one per parameter, in declaration order. Omit for zero-parameter methods.
+4. **`@return` tag** — always present when the return type is not `void`.
+5. **`@throws` tag** — one per checked or documented unchecked exception.
+
+```java
+/// Resolves the base URL for the named REST client.
+///
+/// The URL is sourced from `platform.rest.client.<name>.base-url`. If no value
+/// is configured the method falls back to the provided default.
+///
+/// @param name       the logical client name
+/// @param defaultUrl the fallback URL used when no configuration is present
+/// @return the resolved base URL, never `null`
+/// @throws IllegalArgumentException if `name` is blank
+public String resolveBaseUrl(String name, String defaultUrl) { /* ... */ }
+```
+
+**Rules:**
+
+- Do **not** use `{@code …}` or `{@link …}` — use backticks and `[ClassName#method]` respectively.
+- Do **not** document `@param` or `@return` with trivial restatements of the signature
+  (e.g., avoid *"@param name the name"*).
+- Keep each tag description to a single line where possible; wrap only when genuinely needed.
+- Private and package-private methods do not require Javadoc but may have a brief `//` comment.
+
 For documentation files (`README.md`, `docs/CONFIGURATIONS.md`), follow the
 `write-documentation` skill (§2).
 
