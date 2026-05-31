@@ -152,6 +152,19 @@ All public API elements (public classes, methods, and fields) must have Javadoc 
 describe their purpose and behaviour. Comments should be concise but informative, ideally not exceeding 3-4 sentences
 per element.
 
+### Javadoc for records
+
+For `record` types, document each component (field) using `@param` tags in the **class-level**
+Javadoc comment. Do **not** place a separate Javadoc comment on the individual record components.
+
+```java
+/// Holds the timeout configuration for outbound REST calls.
+///
+/// @param connectTimeoutMs maximum time in milliseconds to establish a connection
+/// @param readTimeoutMs    maximum time in milliseconds to wait for a response
+public record TimeoutProperties(int connectTimeoutMs, int readTimeoutMs) {}
+```
+
 For documentation files (`README.md`, `docs/CONFIGURATIONS.md`), follow the
 `write-documentation` skill (§2).
 
