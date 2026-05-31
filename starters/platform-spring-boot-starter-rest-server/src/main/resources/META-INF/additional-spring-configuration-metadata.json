@@ -1,0 +1,60 @@
+{
+  "groups": [
+    {
+      "name": "platform.rest.server.logging.rules",
+      "type": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$LoggingRule",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties",
+      "sourceMethod": "rules()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "platform.rest.server.logging.rules[*].path",
+      "type": "java.lang.String",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$LoggingRule",
+      "description": "Ant-style URI pattern this rule applies to (e.g. /api/**)."
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].methods",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$LoggingRule",
+      "description": "HTTP methods this rule applies to (e.g. GET, POST). Omit or leave empty to match all methods."
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$LoggingRule",
+      "description": "Set to false to silence all logging (request and response) for matching requests. Defaults to true.",
+      "defaultValue": true
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].request.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$PayloadConfig",
+      "description": "When true, the request body is captured and included in the log entry.",
+      "defaultValue": false
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].response.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$PayloadConfig",
+      "description": "When true, the response body is captured and included in the log entry.",
+      "defaultValue": false
+    }
+  ],
+  "hints": [
+    {
+      "name": "platform.rest.server.logging.rules[*].methods",
+      "values": [
+        { "value": "GET" },
+        { "value": "POST" },
+        { "value": "PUT" },
+        { "value": "PATCH" },
+        { "value": "DELETE" },
+        { "value": "HEAD" },
+        { "value": "OPTIONS" }
+      ]
+    }
+  ]
+}
+

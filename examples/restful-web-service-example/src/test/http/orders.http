@@ -1,0 +1,53 @@
+# To prevent responses from being saved in files in the
+
+### Create a new order
+POST http://localhost:8080/api/v1/orders
+Content-Type: application/json
+
+{
+    "lineItems": [
+        {
+            "sku": "12345",
+            "quantity": 2
+        },
+        {
+            "sku": "67890",
+            "quantity": 1
+        }
+    ],
+    "billing": {
+        "paymentId": "PAY-1234567890",
+        "firstName": "First",
+        "lastName": "Last",
+        "email": "billing@example.com",
+        "phone": "123-456-7890",
+        "address": {
+            "addressLine": "123 Test St.",
+            "city": "Test City",
+            "regionCode": "BC",
+            "postalCode": "V6B 6B1",
+            "countryCode": "CA"
+        }
+    },
+    "shipping": {
+        "firstName": "First",
+        "lastName": "Last",
+        "email": "shipping@example.com",
+        "phone": "123-456-7890",
+        "address": {
+            "addressLine": "123 Test St.",
+            "city": "Test City",
+            "regionCode": "BC",
+            "postalCode": "V6B 6B1",
+            "countryCode": "CA"
+        }
+    }
+}
+
+>>! responses/create-order.json
+
+### Get the order by ID
+GET http://localhost:8080/api/v1/orders/1
+
+>>! responses/get-order.json
+

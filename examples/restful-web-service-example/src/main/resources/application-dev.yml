@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: restful-web-service-example
+  main:
+    banner-mode: off
+
+logging:
+  level:
+    root: INFO
+    com.kevshah.example.restfulwebservice: DEBUG
+  structured:
+    format:
+      console: ecs
+
+platform:
+  rest:
+    server:
+      logging:
+        enabled: true
+        rules:
+          - path: /api/v1/orders
+            methods: [GET, POST]
+            enabled: true
+            request:
+              enabled: true
+            response:
+              enabled: true
+
+
+

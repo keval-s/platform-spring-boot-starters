@@ -26,4 +26,13 @@
         <module>starters/platform-spring-boot-starter-rest-server</module>
     </modules>
 
+    <profiles>
+        <profile>
+            <id>examples</id>
+            <modules>
+                <module>examples/restful-web-service-example</module>
+            </modules>
+        </profile>
+    </profiles>
+
 </project>
