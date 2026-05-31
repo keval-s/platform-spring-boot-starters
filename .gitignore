@@ -29,3 +29,6 @@ out/
 ### System / OS ###
 .DS_Store
 Thumbs.db
+
+### HTTP Client ###
+**/test/http/responses/
