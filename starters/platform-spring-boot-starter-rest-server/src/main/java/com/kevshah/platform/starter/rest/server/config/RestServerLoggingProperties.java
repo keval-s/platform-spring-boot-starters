@@ -23,6 +23,9 @@ import java.util.List;
 ///         enabled: true
 ///     - path: /api/**              # all other methods – no payload logging
 /// ```
+///
+/// @param enabled Master switch for REST server logging. When `false`, no logging is performed regardless of any rules.
+/// @param rules   Ordered list of path/method logging rules. The first matching rule is applied to each request. If no rules match, no logging is performed for that request.
 public record RestServerLoggingProperties(
         Boolean enabled,
         List<LoggingRule> rules
@@ -30,11 +33,11 @@ public record RestServerLoggingProperties(
 
     /// A single path/method logging rule.
     ///
-    /// - `path` – Ant-style URI pattern (e.g. `/api/**`).
-    /// - `methods` – HTTP methods this rule applies to. Omit or leave empty to match _all_ methods.
-    /// - `enabled` – set to `false` to silence _all_ logging for matching requests. Defaults to `true`.
-    /// - `request` – request-payload logging settings; `null` means no payload is logged.
-    /// - `response` – response-payload logging settings; `null` means no payload is logged.
+    /// @param path     Ant-style URI pattern (e.g. `/api/**`) that this rule applies to.
+    /// @param methods  HTTP methods this rule applies to. Omit or leave empty to match _all_ methods.
+    /// @param enabled  Set to `false` to silence _all_ logging for matching requests. Defaults to `true`.
+    /// @param request  Request-payload logging settings; `null` means no payload is logged.
+    /// @param response Response-payload logging settings; `null` means no payload is logged.
     public record LoggingRule(
             String path,
             List<String> methods,
@@ -62,7 +65,7 @@ public record RestServerLoggingProperties(
 
     /// Configuration for payload (request or response body) logging.
     ///
-    /// - `enabled` – when `true`, the payload is captured and included in the log entry.
+    /// @param enabled Set to `true` to capture and include the payload in the log entry. When `false` or `null`, the payload is not logged.
     public record PayloadConfig(Boolean enabled) {
 
         /// Returns `true` when payload logging is switched on.

@@ -1,5 +1,6 @@
 package com.kevshah.platform.starter.rest.server.filter;
 
+import com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties;
 import com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties.LoggingRule;
 import com.kevshah.platform.starter.rest.server.config.RestServerProperties;
 import jakarta.servlet.FilterChain;
@@ -21,17 +22,38 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+/// Servlet filter that logs incoming HTTP requests and outgoing HTTP responses.
+///
+/// Logging behaviour is governed by [RestServerProperties] — it can be disabled globally or
+/// fine-tuned per path and HTTP method via [RestServerLoggingProperties.LoggingRule] entries.
+/// Request and response bodies are cached using Spring's [ContentCachingRequestWrapper] and
+/// [ContentCachingResponseWrapper] so the payloads remain available to downstream handlers.
 @Slf4j
 public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
 
     private final RestServerProperties properties;
     private final JsonMapper jsonMapper;
 
+    /// Creates a new filter with the given server properties and JSON mapper.
+    ///
+    /// @param properties server-level configuration including the logging rules
+    /// @param jsonMapper mapper used to parse payload bodies into structured JSON for log output
     public StandardRequestResponseLoggingFilter(RestServerProperties properties, JsonMapper jsonMapper) {
         this.properties = properties;
         this.jsonMapper = jsonMapper;
     }
 
+    /// Applies request/response logging around the filter chain for the current request.
+    ///
+    /// Logging is skipped entirely when the global logging flag is disabled or when a matching
+    /// [RestServerLoggingProperties.LoggingRule] has `enabled` set to `false`. Request and
+    /// response payload logging are each controlled independently by the matched rule.
+    ///
+    /// @param request     the current HTTP request
+    /// @param response    the current HTTP response
+    /// @param filterChain the remaining filter chain
+    /// @throws ServletException if a servlet error occurs during filter processing
+    /// @throws IOException      if an I/O error occurs during filter processing
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (properties.logging() == null || !Boolean.TRUE.equals(properties.logging().enabled())) {
