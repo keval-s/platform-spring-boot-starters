@@ -1,0 +1,14 @@
+logging:
+  level:
+    root: INFO
+    com.kevshah.example.restclientexample: DEBUG
+  structured:
+    format:
+      console: ecs
+
+platform:
+  rest:
+    server:
+      logging:
+        enabled: true
+

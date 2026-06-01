@@ -31,6 +31,7 @@
         <profile>
             <id>examples</id>
             <modules>
+                <module>examples/rest-client-example</module>
                 <module>examples/restful-web-service-example</module>
             </modules>
         </profile>

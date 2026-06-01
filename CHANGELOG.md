@@ -52,3 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added example application demonstrating the `platform-spring-boot-starter-rest-server` starter with an Orders REST API
 
+#### rest-client-example
+
+- Added example application demonstrating the `platform-spring-boot-starter-rest-client` starter with two named
+  clients (`posts-client`, `users-client`) calling the public JSONPlaceholder API, showcasing endpoint catalogues,
+  static default query parameters, URI template variable expansion, per-client retry policies, and timeouts
+

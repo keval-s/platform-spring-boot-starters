@@ -11,8 +11,8 @@ import org.springframework.web.client.RestClient;
 
 /// Auto-configuration for `platform-spring-boot-starter-rest-client`.
 ///
-/// Activates when `RestClient` is on the classpath (i.e. `spring-boot-starter-web`
-/// or `spring-boot-starter-webflux` is present).
+/// Activates when `RestClient` is on the classpath (i.e. `spring-boot-starter-restclient`,
+/// `spring-boot-starter-web`, or `spring-boot-starter-webflux` is present).
 ///
 /// Registers a single `PlatformRestClientRegistry` bean named
 /// `platformRestClientRegistry` that holds one pre-built [RestClient] and one

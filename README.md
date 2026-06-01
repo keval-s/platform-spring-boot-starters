@@ -26,6 +26,7 @@ platform-spring-boot-starters/
 │   ├── platform-spring-boot-starter-rest-client/ # REST client starter
 │   └── platform-spring-boot-starter-rest-server/ # REST server starter
 └── examples/                                      # Runnable example applications
+    ├── rest-client-example/                       # Example demonstrating the rest-client starter
     └── restful-web-service-example/               # Example RESTful web service
 ```
 
@@ -50,6 +51,7 @@ platform-spring-boot-starters/
 
 | Artifact ID | Description |
 |---|---|
+| `rest-client-example` | Runnable Spring Boot application demonstrating the rest-client starter against the public JSONPlaceholder API. |
 | `restful-web-service-example` | Runnable Spring Boot application demonstrating the rest-server starter. |
 
 ## Contributing
