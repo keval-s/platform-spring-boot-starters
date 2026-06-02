@@ -29,7 +29,7 @@ This project contains two types of modules:
 | Test kind | Source root | Naming rule |
 |---|---|---|
 | Unit test | `src/test/java` | `<ClassUnderTest>Test` |
-| Integration test | `src/test/java` | `<ClassUnderTest>IT` or `<Feature>IntegrationTest` |
+| Integration test | `src/test/java` | `<Feature>IntegrationTest` |
 | Auto-configuration test | `src/test/java` | `<AutoConfigClass>Test` |
 | Test fixture / helper | `src/test/java` | `<Name>Fixture` or `<Name>TestHelper` |
 
@@ -243,8 +243,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 ```
 
-For web-layer auto-configuration, use `WebApplicationContextRunner` or
-`ReactiveWebApplicationContextRunner` instead of `ApplicationContextRunner`.
+For web-layer auto-configuration, use `WebApplicationContextRunner`instead of `ApplicationContextRunner`.
 
 ### 5b. Starter / Library Modules — Full Spring Context Integration Tests
 
