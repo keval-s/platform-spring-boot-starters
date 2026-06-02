@@ -1,0 +1,9 @@
+### Get all posts
+GET http://localhost:8080/api/v1/posts
+
+>>! responses/get-posts.json
+
+### Get a post by ID
+GET http://localhost:8080/api/v1/posts/1
+
+>>! responses/get-post.json

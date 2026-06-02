@@ -1,0 +1,27 @@
+### Create a new user
+POST http://localhost:8080/api/v1/users
+Content-Type: application/json
+
+{
+    "id": 1,
+    "name": "Test",
+    "username": "testuser",
+    "email": "test@example.com",
+    "phone": "123-123-1234",
+    "website": "example.com"
+}
+
+>>! responses/create-user.json
+
+### Get the user by ID
+GET http://localhost:8080/api/v1/users/1
+
+>>! responses/get-user.json
+
+### Get all users
+GET http://localhost:8080/api/v1/users
+
+>>! responses/get-users.json
+
+### Delete the user by ID
+DELETE http://localhost:8080/api/v1/users/1
