@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "platform.rest.server.logging.rules",
-      "type": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$LoggingRule",
-      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties",
+      "type": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$LoggingRule",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties",
       "sourceMethod": "rules()"
     }
   ],
@@ -11,35 +11,87 @@
     {
       "name": "platform.rest.server.logging.rules[*].path",
       "type": "java.lang.String",
-      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$LoggingRule",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$LoggingRule",
       "description": "Ant-style URI pattern this rule applies to (e.g. /api/**)."
     },
     {
       "name": "platform.rest.server.logging.rules[*].methods",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$LoggingRule",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$LoggingRule",
       "description": "HTTP methods this rule applies to (e.g. GET, POST). Omit or leave empty to match all methods."
     },
     {
       "name": "platform.rest.server.logging.rules[*].enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$LoggingRule",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$LoggingRule",
       "description": "Set to false to silence all logging (request and response) for matching requests. Defaults to true.",
       "defaultValue": true
     },
     {
       "name": "platform.rest.server.logging.rules[*].request.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$PayloadConfig",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$RequestConfig",
+      "description": "Set to false to suppress the request log entry entirely for this rule. Defaults to true.",
+      "defaultValue": true
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].request.payload.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$PayloadConfig",
       "description": "When true, the request body is captured and included in the log entry.",
       "defaultValue": false
     },
     {
+      "name": "platform.rest.server.logging.rules[*].request.headers.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$HeadersConfig",
+      "description": "When true, request headers are captured and included in the log entry.",
+      "defaultValue": false
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].request.headers.include",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$HeadersConfig",
+      "description": "Header names to include (case-insensitive). When empty or null all headers are included subject to the exclude list."
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].request.headers.exclude",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$HeadersConfig",
+      "description": "Header names to exclude from the log entry (case-insensitive). Takes precedence over include."
+    },
+    {
       "name": "platform.rest.server.logging.rules[*].response.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.kevshah.platform.starter.rest.server.config.RestServerLoggingProperties$PayloadConfig",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$ResponseConfig",
+      "description": "Set to false to suppress the response log entry entirely for this rule. Defaults to true.",
+      "defaultValue": true
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].response.payload.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$PayloadConfig",
       "description": "When true, the response body is captured and included in the log entry.",
       "defaultValue": false
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].response.headers.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$HeadersConfig",
+      "description": "When true, response headers are captured and included in the log entry.",
+      "defaultValue": false
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].response.headers.include",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$HeadersConfig",
+      "description": "Header names to include (case-insensitive). When empty or null all headers are included subject to the exclude list."
+    },
+    {
+      "name": "platform.rest.server.logging.rules[*].response.headers.exclude",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.kevshah.platform.starter.rest.server.config.LoggingProperties$HeadersConfig",
+      "description": "Header names to exclude from the log entry (case-insensitive). Takes precedence over include."
     }
   ],
   "hints": [
@@ -57,4 +109,3 @@
     }
   ]
 }
-

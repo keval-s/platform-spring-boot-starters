@@ -23,8 +23,19 @@ platform:
             enabled: true
             request:
               enabled: true
+              payload:
+                enabled: true
+              headers:
+                include:
+                  - Content-Type
+                  - Accept
             response:
               enabled: true
+              payload:
+                enabled: true
+              headers:
+                include:
+                  - Content-Type
 
 
 

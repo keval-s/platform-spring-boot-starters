@@ -30,6 +30,11 @@ import java.util.Map;
 ///             wait-duration: 500ms
 ///           ssl:
 ///             bundle: payment-service-ssl
+///           logging:
+///             enabled: true
+///             request-body: true
+///             response-body: true
+///             level: DEBUG
 /// ```
 ///
 /// @param baseUrl            Base URL of the external service (e.g. `https://payment.example.com`).
@@ -41,6 +46,7 @@ import java.util.Map;
 /// @param endpoints          Named endpoint definitions for this client. Each key becomes the logical name used to look up the endpoint via `PlatformRestClientRegistry.getEndpoint(clientName, endpointName)`.
 /// @param retry              Retry configuration. When absent, requests are attempted exactly once.
 /// @param ssl                SSL bundle configuration. When absent, the JVM's default SSL context is used.
+/// @param logging            Request/response logging configuration for all endpoints of this client. Endpoint-level `logging` settings are merged on top of these values.
 public record ClientProperties(
         String baseUrl,
         String defaultContentType,
@@ -50,7 +56,8 @@ public record ClientProperties(
         Duration readTimeout,
         Map<String, EndpointProperties> endpoints,
         @NestedConfigurationProperty RetryProperties retry,
-        @NestedConfigurationProperty SslProperties ssl
+        @NestedConfigurationProperty SslProperties ssl,
+        @NestedConfigurationProperty LoggingProperties logging
 ) {
 }
 

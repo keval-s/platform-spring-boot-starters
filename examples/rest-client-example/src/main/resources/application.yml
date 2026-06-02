@@ -4,14 +4,27 @@ spring:
   main:
     banner-mode: off
 
+logging:
+  level:
+    root: INFO
+    com.kevshah.example.restclientexample: DEBUG
+    com.kevshah.platform.starter.rest.client: DEBUG
+  structured:
+    format:
+      console: ecs
+
 platform:
   rest:
+    server:
+      logging:
+        enabled: true
     client:
       clients:
 
         # ── posts-client ──────────────────────────────────────────────────────
         # Demonstrates: endpoint catalogue, static default query params, URI
-        # template variable, retry with status-code triggers, and timeouts.
+        # template variable, retry with status-code triggers, timeouts, and
+        # structured request/response logging with per-endpoint overrides.
         posts-client:
           base-url: https://jsonplaceholder.typicode.com
           default-accept: application/json
@@ -21,21 +34,33 @@ platform:
             max-attempts: 3
             wait-duration: 500ms
             retry-on-response-statuses: [ 429, 503 ]
+          logging:
+            enabled: true
           endpoints:
             list-posts:
               method: GET
               path: /posts
-              # _limit is a JSONPlaceholder pagination param; sent on every call
-              # to this endpoint without any extra code in the service layer.
               default-query-params:
                 _limit: "10"
+              logging:
+                enabled: true
+                request:
+                  headers:
+                    enabled: true
+                response:
+                  headers:
+                    enabled: true
+                  payload:
+                    enabled: true
             get-post:
               method: GET
-              # {id} is expanded at call time via Map.of("id", <value>)
               path: /posts/{id}
+              logging:
+                enabled: false
 
         # ── users-client ──────────────────────────────────────────────────────
-        # Demonstrates: a second independent named client with its own retry policy.
+        # Demonstrates: a second independent named client with its own retry
+        # policy and structured logging enabled at INFO level.
         users-client:
           base-url: https://jsonplaceholder.typicode.com
           default-accept: application/json
@@ -44,11 +69,84 @@ platform:
           retry:
             max-attempts: 2
             wait-duration: 250ms
+          logging:
+            enabled: true
+            level: INFO
+            request:
+              headers:
+                enabled: true
+                include:
+                  - Content-Type
+                  - Accept
           endpoints:
             list-users:
               method: GET
               path: /users
+              logging:
+                enabled: true
+                request:
+                  headers:
+                    enabled: true
+                    include:
+                      - Content-Type
+                      - Accept
+                response:
+                  headers:
+                    enabled: true
+                    include:
+                      - Content-Type
+                      - Content-Length
+                  payload:
+                    enabled: true
             get-user:
               method: GET
               path: /users/{id}
+              logging:
+                  enabled: true
+                  request:
+                    headers:
+                      enabled: true
+                      include:
+                      - Content-Type
+                      - Accept
+                  response:
+                    headers:
+                      enabled: true
+                      include:
+                      - Content-Type
+                      - Content-Length
+                    payload:
+                      enabled: true
+            create-user:
+              method: POST
+              path: /users
+              logging:
+                enabled: true
+                request:
+                  headers:
+                    enabled: true
+                    include:
+                      - Content-Type
+                      - Accept
+                  payload:
+                    enabled: true
+                response:
+                  headers:
+                    enabled: true
+                    include:
+                      - Content-Type
+                      - Content-Length
+                  payload:
+                    enabled: true
+            delete-user:
+              method: DELETE
+              path: /users/{id}
+              logging:
+                enabled: true
+                request:
+                  headers:
+                    enabled: true
+                    include:
+                      - Content-Type
+                      - Accept
 

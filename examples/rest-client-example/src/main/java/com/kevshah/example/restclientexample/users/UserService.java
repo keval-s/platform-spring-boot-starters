@@ -43,5 +43,26 @@ public class UserService {
     public User getUser(int id) {
         return usersClient.get("get-user", Map.of("id", id), User.class);
     }
+
+
+    /// Creates a new user with the given details.
+    ///
+    /// The user details are sent as JSON in the request body, and the created user is returned in the response body.
+    ///
+    /// @param user the user details for the new user
+    /// @return the created user
+    public User createUser(User user) {
+        return usersClient.post("create-user", user, User.class);
+    }
+
+
+    /// Delete a user by their identifier
+    ///
+    /// @param id the user identifier
+    public void deleteUser(int id) {
+        usersClient.delete("delete-user", Map.of("id", id));
+    }
+
+
 }
 

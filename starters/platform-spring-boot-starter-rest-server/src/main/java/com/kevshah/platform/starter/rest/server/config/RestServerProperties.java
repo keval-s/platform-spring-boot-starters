@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 /// Top-level configuration properties for `platform-spring-boot-starter-rest-server`.
 /// All properties are nested under the `platform.rest.server` prefix.
 ///
-/// @param logging Configuration properties for request/response logging. See [RestServerLoggingProperties].
+/// @param logging Configuration properties for request/response logging. See [LoggingProperties].
 @ConfigurationProperties(prefix = "platform.rest.server")
-public record RestServerProperties(@NestedConfigurationProperty RestServerLoggingProperties logging) {
+public record RestServerProperties(@NestedConfigurationProperty LoggingProperties logging) {
 
 }

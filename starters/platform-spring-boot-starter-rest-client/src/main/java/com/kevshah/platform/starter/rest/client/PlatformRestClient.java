@@ -1,6 +1,8 @@
 package com.kevshah.platform.starter.rest.client;
 
 import com.kevshah.platform.starter.rest.client.config.EndpointProperties;
+import com.kevshah.platform.starter.rest.client.logging.LoggingContext;
+import com.kevshah.platform.starter.rest.client.logging.RestClientLoggingInterceptor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -717,6 +719,7 @@ public final class PlatformRestClient {
         var endpoint = registry.getEndpoint(clientName, endpointName);
         var restClient = registry.getClient(clientName);
         var httpMethod = methodOverride != null ? methodOverride : HttpMethod.valueOf(endpoint.method());
+        var effectiveLogging = registry.getEffectiveLogging(clientName, endpointName);
 
         return registry.executeWithRetry(clientName, ctx -> {
             var requestSpec = restClient.method(httpMethod)
@@ -724,6 +727,11 @@ public final class PlatformRestClient {
 
             applyEndpointHeaders(requestSpec, endpoint);
             applyAdditionalHeaders(requestSpec, additionalHeaders);
+
+            if (effectiveLogging != null && Boolean.TRUE.equals(effectiveLogging.enabled())) {
+                requestSpec.attribute(RestClientLoggingInterceptor.ATTRIBUTE_KEY,
+                        new LoggingContext(clientName, endpointName, effectiveLogging));
+            }
 
             var responseSpec = body != null
                     ? requestSpec.body(body).retrieve()

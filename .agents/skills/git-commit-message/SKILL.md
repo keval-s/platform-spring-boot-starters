@@ -35,14 +35,21 @@ Once the user confirms, run:
 # Summary of what is staged (file-level overview)
 git --no-pager diff --staged --stat
 
-# Full staged diff (content detail)
-git --no-pager diff --staged
+# Full staged diff. 
+# -w ignores whitespace-only formatting changes.
+# Pathspecs exclude common massive test payloads and SQL dumps to save context.
+# Full staged diff, safe for multi-module Maven projects
+git --no-pager diff --staged -w -- . ':(exclude)**/src/test/resources/**/*.json' ':(exclude)**/src/test/resources/**/*.csv' ':(exclude)**/src/test/resources/**/*.sql' ':(exclude)**/src/test/resources/**/*.xml' ':(exclude)**/src/test/resources/**/*.yaml' ':(exclude)**/src/test/resources/**/*.yml'
 ```
 
-Read **both** outputs carefully before writing any message:
+### Diff Size Limit Guardrail:
 
-- The `--stat` output gives you the scope (which files / modules changed).
-- The full diff gives you the precise nature of each change.
+If the `--stat` output shows more than **30 files changed** or the full diff output exceeds **1000 lines**,
+do not attempt to read the entire diff. Instead:
+
+1. Read only the `--stat` output to identify the main areas of change and affected modules.
+2. Ask the user: "The staged changes are too large to read line-by-line. Could you provide a 1-2
+   sentence summary of the core changes so I can format the commit message correctly?"
 
 ---
 
@@ -63,27 +70,27 @@ Use the **Conventional Commits** specification
 
 ### Subject line rules
 
-| Rule | Detail |
-|------|--------|
-| Max length | **72 characters** |
-| Case | lowercase — never sentence-case or ALL-CAPS |
-| Tense | imperative mood (`add`, `fix`, `bump`, not `added`, `fixes`) |
-| No period | do not end the subject line with `.` |
-| Scope | use the Maven artifact ID short name (e.g. `rest-server`, `dependencies`, `build-parent`) or omit if the change is truly cross-cutting |
+| Rule       | Detail                                                                                                                                 |
+|------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| Max length | **50 characters** (strict)                                                                                                             |
+| Case       | lowercase — never sentence-case or ALL-CAPS                                                                                            |
+| Tense      | imperative mood (`add`, `fix`, `bump`, not `added`, `fixes`)                                                                           |
+| No period  | do not end the subject line with `.`                                                                                                   |
+| Scope      | use the Maven artifact ID short name (e.g. `rest-server`, `dependencies`, `build-parent`) or omit if the change is truly cross-cutting |
 
 ### Allowed types
 
-| Type | When to use |
-|------|-------------|
-| `feat` | a new feature or capability |
-| `fix` | a bug fix |
-| `chore` | maintenance — version bumps, build changes, tooling |
-| `docs` | documentation only |
-| `test` | adding or correcting tests |
-| `refactor` | code restructuring with no behaviour change |
-| `perf` | performance improvement |
-| `ci` | CI/CD pipeline changes |
-| `revert` | reverts a previous commit |
+| Type       | When to use                                         |
+|------------|-----------------------------------------------------|
+| `feat`     | a new feature or capability                         |
+| `fix`      | a bug fix                                           |
+| `chore`    | maintenance — version bumps, build changes, tooling |
+| `docs`     | documentation only                                  |
+| `test`     | adding or correcting tests                          |
+| `refactor` | code restructuring with no behaviour change         |
+| `perf`     | performance improvement                             |
+| `ci`       | CI/CD pipeline changes                              |
+| `revert`   | reverts a previous commit                           |
 
 ### Body (optional)
 
@@ -104,33 +111,36 @@ Use the **Conventional Commits** specification
 
 Derive the scope from the staged files:
 
-| Staged files are in… | Scope to use |
-|----------------------|--------------|
-| `starters/platform-spring-boot-starter-<name>/` | `<name>` (e.g. `rest-server`) |
-| `platform-spring-boot-starter-dependencies/` | `dependencies` |
-| `platform-spring-boot-starter-parent/` | `parent` |
-| `platform-spring-boot-starter-build-parent/` | `build-parent` |
-| `examples/<example-name>/` | `<example-name>` (e.g. `restful-web-service-example`) |
-| Root files only (`README.md`, `AGENTS.md`, `CHANGELOG.md`, `pom.xml`) | omit scope |
-| Multiple modules with no single focus | omit scope and widen the subject |
+| Staged files are in…                                                  | Scope to use                                          |
+|-----------------------------------------------------------------------|-------------------------------------------------------|
+| `starters/platform-spring-boot-starter-<name>/`                       | `<name>` (e.g. `rest-server`)                         |
+| `platform-spring-boot-starter-dependencies/`                          | `dependencies`                                        |
+| `platform-spring-boot-starter-parent/`                                | `parent`                                              |
+| `platform-spring-boot-starter-build-parent/`                          | `build-parent`                                        |
+| `examples/<example-name>/`                                            | `<example-name>` (e.g. `restful-web-service-example`) |
+| Root files only (`README.md`, `AGENTS.md`, `CHANGELOG.md`, `pom.xml`) | omit scope                                            |
+| Multiple modules with no single focus                                 | omit scope and widen the subject                      |
 
 ---
 
 ## 5. Examples
 
 ### Single-module feature
+
 ```
-feat(rest-server): add per-rule HTTP method filtering to logging
+feat(rest-server): add method filtering
 ```
 
 ### Dependency bump
+
 ```
-chore(dependencies): bump spring boot from 4.0.3 to 4.0.7
+chore(dependencies): bump spring boot to 4.0.6
 ```
 
 ### Bug fix with body
+
 ```
-fix(rest-server): prevent NPE in logging filter when rules list is absent
+fix(rest-server): prevent logging NPE
 
 The `StandardRequestResponseLoggingFilter` threw a NullPointerException
 when the `platform.rest.server.logging.rules` list was omitted entirely
@@ -139,8 +149,9 @@ to an empty list on startup.
 ```
 
 ### Breaking change
+
 ```
-feat(rest-server): replace HeaderLoggingMode enum with sealed interface
+feat(rest-server): use sealed interface
 
 BREAKING CHANGE: `HeaderLoggingMode` is now a sealed interface with
 `record` implementations. Consumers that referenced the enum constants
@@ -148,13 +159,15 @@ directly must migrate to the new types.
 ```
 
 ### Docs-only change
+
 ```
-docs: update rest-server README with logging configuration examples
+docs: add logging examples to README
 ```
 
 ### Cross-cutting refactor
+
 ```
-refactor: migrate all Javadoc to markdown triple-slash style
+refactor: use markdown Javadoc
 ```
 
 ---
@@ -170,9 +183,10 @@ refactor: migrate all Javadoc to markdown triple-slash style
 3. **Draft the subject line** in imperative mood, ≤ 72 characters.
 
 4. **Decide if a body is needed:**
-   - Skip the body for trivial, self-explanatory changes.
-   - Add a body when the *why* is not obvious from the subject alone, or when the change
-     spans multiple logical concerns.
+
+- Skip the body for trivial, self-explanatory changes.
+- Add a body when the *why* is not obvious from the subject alone, or when the change
+  spans multiple logical concerns.
 
 5. **Add footers** only if there is a breaking change or a linked issue.
 
@@ -180,9 +194,12 @@ refactor: migrate all Javadoc to markdown triple-slash style
 
    ````
    ```
-   feat(rest-server): add per-rule HTTP method filtering to logging
+   feat(rest-server): add method filtering
    ```
    ````
+
+7. **Offer to Execute:** After presenting the message, ask the user: "Would you like me to commit this for you?" If they
+   confirm, execute the commit using git commit -m "<subject>" -m "<body>"
 
 ---
 
@@ -191,10 +208,10 @@ refactor: migrate all Javadoc to markdown triple-slash style
 Before presenting the message, verify:
 
 - [ ] The user confirmed that all intended changes are staged.
-- [ ] Both `--stat` and the full diff were read.
+- [ ] Both `--stat` and the full diff were read (unless size limits were hit).
 - [ ] The type accurately reflects the dominant nature of the change.
 - [ ] The scope matches the affected Maven module(s) or is omitted when cross-cutting.
-- [ ] The subject is ≤ 72 characters, lowercase, imperative mood, no trailing period.
-- [ ] A body is present whenever the *why* is non-obvious.
+- [ ] The subject is ≤ 50 characters, lowercase, imperative mood, no trailing period.
+- [ ] A body is present whenever the *why* is non-obvious (wrapped at 72 chars).
 - [ ] `BREAKING CHANGE:` footer is present if a public API is broken.
 - [ ] No sensitive information (secrets, tokens, passwords) appears anywhere in the message.

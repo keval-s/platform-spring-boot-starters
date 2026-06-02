@@ -2,9 +2,11 @@ package com.kevshah.platform.starter.rest.client;
 
 import com.kevshah.platform.starter.rest.client.config.ClientProperties;
 import com.kevshah.platform.starter.rest.client.config.EndpointProperties;
+import com.kevshah.platform.starter.rest.client.config.LoggingProperties;
 import com.kevshah.platform.starter.rest.client.config.RestClientProperties;
 import com.kevshah.platform.starter.rest.client.config.RetryProperties;
 import com.kevshah.platform.starter.rest.client.exception.PlatformHttpStatusRetryException;
+import com.kevshah.platform.starter.rest.client.logging.RestClientLoggingInterceptor;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpHeaders;
@@ -126,7 +128,7 @@ public final class PlatformRestClientRegistry {
     ///
     /// Throws `NoSuchElementException` when the named client is not configured.
     <T, E extends Exception> T executeWithRetry(String clientName,
-                                                       RetryCallback<T, E> callback) throws E {
+                                                RetryCallback<T, E> callback) throws E {
         return getRetryTemplate(clientName).execute(callback);
     }
 
@@ -146,6 +148,26 @@ public final class PlatformRestClientRegistry {
     /// Returns an unmodifiable set of all configured client names.
     public Set<String> getClientNames() {
         return clients.keySet();
+    }
+
+    /// Returns the effective `LoggingProperties` for the named endpoint on the named client.
+    ///
+    /// The result is produced by merging the client-level `logging` settings with the
+    /// endpoint-level `logging` settings, where non-`null` endpoint fields take precedence.
+    /// Returns `null` when neither the client nor the endpoint has logging configured.
+    ///
+    /// Package-private — used by `PlatformRestClient` to set the logging context attribute
+    /// on each request.
+    LoggingProperties getEffectiveLogging(String clientName, String endpointName) {
+        var clientProps = properties.clients() != null ? properties.clients().get(clientName) : null;
+        if (clientProps == null) {
+            return null;
+        }
+        var endpointProps = clientProps.endpoints() != null
+                ? clientProps.endpoints().get(endpointName)
+                : null;
+        var endpointLogging = endpointProps != null ? endpointProps.logging() : null;
+        return LoggingProperties.merge(clientProps.logging(), endpointLogging);
     }
 
     // -------------------------------------------------------------------------
@@ -168,6 +190,7 @@ public final class PlatformRestClientRegistry {
             builder.requestInterceptor(new DefaultQueryParamsInterceptor(props.defaultQueryParams()));
         }
 
+        builder.requestInterceptor(new RestClientLoggingInterceptor());
         builder.requestFactory(buildRequestFactory(props, sslBundles));
 
         // Status handler that converts retryable status codes into PlatformHttpStatusRetryException
