@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `PlatformHttpStatusRetryException` thrown by the built-in status handler when a configured retryable HTTP status
   code is received
 - Added `DefaultQueryParamsInterceptor` that appends client-level default query parameters to every outbound request
+- Added `LoggingProperties` configuration record (`platform.rest.client.clients[*].logging`) for structured
+  request/response logging; endpoint-level overrides via `platform.rest.client.clients[*].endpoints[*].logging` allow
+  per-endpoint enable/disable, log level, payload capture, and header include/exclude filtering
+- Added `RestClientLoggingInterceptor` that emits structured SLF4J `REST client request` and `REST client response`
+  entries per outbound call; when response payload logging is enabled the response body is buffered and re-streamed to
+  the deserializer transparently
 
 #### Cross-cutting
 
@@ -45,8 +51,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `RestServerAutoConfiguration` providing structured request/response logging via
   `StandardRequestResponseLoggingFilter`
-- Added `platform.rest.server` configuration properties for enabling and customising logging rules
+- Added `platform.rest.server` configuration properties for enabling and customizing logging rules
 - Configured `maven-surefire-plugin` with Mockito `-javaagent` to suppress self-attach warning on modern JDKs
+- Added `LoggingProperties` structured configuration record with header include/exclude filtering support
 
 #### restful-web-service-example
 
@@ -56,5 +63,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added example application demonstrating the `platform-spring-boot-starter-rest-client` starter with two named
   clients (`posts-client`, `users-client`) calling the public JSONPlaceholder API, showcasing endpoint catalogues,
-  static default query parameters, URI template variable expansion, per-client retry policies, and timeouts
+  static default query parameters, URI template variable expansion, per-client retry policies, timeouts, and logging.
 
