@@ -29,9 +29,7 @@ public class RestClientAutoConfiguration {
     /// application.
     @Bean("platformRestClientRegistry")
     public PlatformRestClientRegistry platformRestClientRegistry(
-            RestClientProperties properties,
-            ObjectProvider<SslBundles> sslBundlesProvider) {
+            RestClientProperties properties, ObjectProvider<SslBundles> sslBundlesProvider) {
         return new PlatformRestClientRegistry(properties, sslBundlesProvider.getIfAvailable());
     }
 }
-

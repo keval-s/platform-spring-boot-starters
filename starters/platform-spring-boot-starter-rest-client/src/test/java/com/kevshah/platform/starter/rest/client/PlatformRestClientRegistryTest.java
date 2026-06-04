@@ -1,22 +1,21 @@
 package com.kevshah.platform.starter.rest.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.kevshah.platform.starter.rest.client.config.ClientProperties;
 import com.kevshah.platform.starter.rest.client.config.EndpointProperties;
 import com.kevshah.platform.starter.rest.client.config.LoggingProperties;
 import com.kevshah.platform.starter.rest.client.config.RestClientProperties;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PlatformRestClientRegistryTest {
 
@@ -38,9 +37,7 @@ class PlatformRestClientRegistryTest {
     }
 
     private PlatformRestClientRegistry registryWithClient(String name, ClientProperties props) {
-        return new PlatformRestClientRegistry(
-                new RestClientProperties(Map.of(name, props)),
-                null);
+        return new PlatformRestClientRegistry(new RestClientProperties(Map.of(name, props)), null);
     }
 
     // -------------------------------------------------------------------------
@@ -53,8 +50,8 @@ class PlatformRestClientRegistryTest {
         @Test
         void getPlatformRestClient_knownClientName_returnsPlatformRestClient() {
             // Given
-            var registry = registryWithClient("svc",
-                    new ClientProperties(baseUrl(), null, null, null, null, null, null, null, null, null));
+            var registry = registryWithClient(
+                    "svc", new ClientProperties(baseUrl(), null, null, null, null, null, null, null, null, null));
 
             // When
             var client = registry.getPlatformRestClient("svc");
@@ -67,8 +64,7 @@ class PlatformRestClientRegistryTest {
         @Test
         void getPlatformRestClient_unknownClientName_throwsNoSuchElementException() {
             // Given
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(Map.of()), null);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(Map.of()), null);
 
             // When/Then
             assertThatThrownBy(() -> registry.getPlatformRestClient("missing"))
@@ -88,9 +84,10 @@ class PlatformRestClientRegistryTest {
         void getEffectiveLogging_noLoggingOnClientOrEndpoint_returnsNull() {
             // Given
             var endpoint = new EndpointProperties("GET", "/api/items", null, null, null, null);
-            var registry = registryWithClient("svc",
-                    new ClientProperties(baseUrl(), null, null, null, null, null,
-                            Map.of("list", endpoint), null, null, null));
+            var registry = registryWithClient(
+                    "svc",
+                    new ClientProperties(
+                            baseUrl(), null, null, null, null, null, Map.of("list", endpoint), null, null, null));
 
             // When
             var result = registry.getEffectiveLogging("svc", "list");
@@ -104,9 +101,10 @@ class PlatformRestClientRegistryTest {
             // Given
             var logging = new LoggingProperties(true, "DEBUG", null, null);
             var endpoint = new EndpointProperties("GET", "/api/items", null, null, null, null);
-            var registry = registryWithClient("svc",
-                    new ClientProperties(baseUrl(), null, null, null, null, null,
-                            Map.of("list", endpoint), null, null, logging));
+            var registry = registryWithClient(
+                    "svc",
+                    new ClientProperties(
+                            baseUrl(), null, null, null, null, null, Map.of("list", endpoint), null, null, logging));
 
             // When
             var result = registry.getEffectiveLogging("svc", "list");
@@ -120,24 +118,34 @@ class PlatformRestClientRegistryTest {
         @Test
         void getEffectiveLogging_endpointLoggingOverridesClient_mergedResult() {
             // Given
-            var clientLogging = new LoggingProperties(false, "DEBUG",
-                    new LoggingProperties.RequestConfig(
-                            new LoggingProperties.PayloadConfig(false), null),
-                    new LoggingProperties.ResponseConfig(
-                            new LoggingProperties.PayloadConfig(false), null)
-            );
-            var endpointLogging = new LoggingProperties(true, "INFO",
+            var clientLogging = new LoggingProperties(
+                    false,
+                    "DEBUG",
+                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(false), null),
+                    new LoggingProperties.ResponseConfig(new LoggingProperties.PayloadConfig(false), null));
+            var endpointLogging = new LoggingProperties(
+                    true,
+                    "INFO",
                     new LoggingProperties.RequestConfig(
                             new LoggingProperties.PayloadConfig(true),
                             new LoggingProperties.HeadersConfig(true, List.of("X-Request-Id"), null)),
                     new LoggingProperties.ResponseConfig(
                             new LoggingProperties.PayloadConfig(true),
-                            new LoggingProperties.HeadersConfig(true, null, List.of("Set-Cookie")))
-            );
+                            new LoggingProperties.HeadersConfig(true, null, List.of("Set-Cookie"))));
             var endpoint = new EndpointProperties("GET", "/api/items/{id}", null, null, null, endpointLogging);
-            var registry = registryWithClient("svc",
-                    new ClientProperties(baseUrl(), null, null, null, null, null,
-                            Map.of("get-item", endpoint), null, null, clientLogging));
+            var registry = registryWithClient(
+                    "svc",
+                    new ClientProperties(
+                            baseUrl(),
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            Map.of("get-item", endpoint),
+                            null,
+                            null,
+                            clientLogging));
 
             // When
             var result = registry.getEffectiveLogging("svc", "get-item");
@@ -162,9 +170,19 @@ class PlatformRestClientRegistryTest {
             var clientLogging = new LoggingProperties(true, "INFO", null, null);
             var endpointLogging = new LoggingProperties(false, null, null, null);
             var endpoint = new EndpointProperties("GET", "/api/health", null, null, null, endpointLogging);
-            var registry = registryWithClient("svc",
-                    new ClientProperties(baseUrl(), null, null, null, null, null,
-                            Map.of("health-check", endpoint), null, null, clientLogging));
+            var registry = registryWithClient(
+                    "svc",
+                    new ClientProperties(
+                            baseUrl(),
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            Map.of("health-check", endpoint),
+                            null,
+                            null,
+                            clientLogging));
 
             // When
             var result = registry.getEffectiveLogging("svc", "health-check");
@@ -198,8 +216,7 @@ class PlatformRestClientRegistryTest {
         @Test
         void getClientNames_noClientsConfigured_returnsEmptySet() {
             // Given
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(null), null);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(null), null);
 
             // When/Then
             assertThat(registry.getClientNames()).isEmpty();
@@ -210,8 +227,7 @@ class PlatformRestClientRegistryTest {
             // Given
             var props = new RestClientProperties(Map.of(
                     "svc-a", new ClientProperties(baseUrl(), null, null, null, null, null, null, null, null, null),
-                    "svc-b", new ClientProperties(baseUrl(), null, null, null, null, null, null, null, null, null)
-            ));
+                    "svc-b", new ClientProperties(baseUrl(), null, null, null, null, null, null, null, null, null)));
             var registry = new PlatformRestClientRegistry(props, null);
 
             // When/Then

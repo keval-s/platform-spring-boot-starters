@@ -12,16 +12,6 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.spi.LoggingEventBuilder;
-import org.springframework.http.server.PathContainer;
-import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.util.ContentCachingResponseWrapper;
-import org.springframework.web.util.pattern.PathPattern;
-import org.springframework.web.util.pattern.PathPatternParser;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,6 +22,15 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.spi.LoggingEventBuilder;
+import org.springframework.http.server.PathContainer;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 /// Servlet filter that logs incoming HTTP requests and outgoing HTTP responses.
 ///
@@ -59,9 +58,6 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
 
     /// Applies request/response logging around the filter chain for the current request.
     ///
-    /// The "Incoming HTTP request" entry is logged **before** `filterChain.doFilter` is called
-    /// so that it always precedes any log entries executed during controller/service execution (e.g. REST client calls).
-    ///
     /// When request body logging is enabled the body is eagerly buffered by a
     /// [CachedBodyRequestWrapper] so it can be included in that pre-chain log entry and later
     /// replayed to downstream handlers (e.g. `@RequestBody` deserialisation).
@@ -72,8 +68,10 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
     /// @throws ServletException if a servlet error occurs during filter processing
     /// @throws IOException      if an I/O error occurs during filter processing
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (properties.logging() == null || !Boolean.TRUE.equals(properties.logging().enabled())) {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        if (properties.logging() == null
+                || !Boolean.TRUE.equals(properties.logging().enabled())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -94,22 +92,26 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
         boolean logRequestEnabled = requestConfig == null || !Boolean.FALSE.equals(requestConfig.enabled());
         boolean logResponseEnabled = responseConfig == null || !Boolean.FALSE.equals(responseConfig.enabled());
 
-        boolean logRequestPayload = logRequestEnabled && requestConfig != null
-                && requestConfig.payload() != null && requestConfig.payload().isEnabled();
-        boolean logResponsePayload = logResponseEnabled && responseConfig != null
-                && responseConfig.payload() != null && responseConfig.payload().isEnabled();
+        boolean logRequestPayload = logRequestEnabled
+                && requestConfig != null
+                && requestConfig.payload() != null
+                && requestConfig.payload().isEnabled();
+        boolean logResponsePayload = logResponseEnabled
+                && responseConfig != null
+                && responseConfig.payload() != null
+                && responseConfig.payload().isEnabled();
 
         // When request body logging is enabled, eagerly buffer the body so it is available
         // for the pre-chain log entry and can be replayed for downstream handlers.
-        HttpServletRequest requestToProcess = logRequestPayload
-                ? new CachedBodyRequestWrapper(request)
-                : request;
+        HttpServletRequest requestToProcess = logRequestPayload ? new CachedBodyRequestWrapper(request) : request;
 
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
         // Log the incoming request BEFORE the chain so this entry always precedes any
-        // logs emitted during controller/service execution (e.g. REST client calls). The response is logged AFTER the chain so that status,
-        // headers and body reflect the final values set by the controller rather than the defaults at the start of the request.
+        // logs emitted during controller/service execution (e.g. REST client calls). The response is logged AFTER the
+        // chain so that status,
+        // headers and body reflect the final values set by the controller rather than the defaults at the start of the
+        // request.
         if (logRequestEnabled) {
             logRequest(requestToProcess, logRequestPayload, requestConfig);
         }
@@ -133,7 +135,9 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
                 builder = addPayload(builder, raw, HttpLoggingKeys.REQUEST_BODY);
             }
         }
-        if (requestConfig != null && requestConfig.headers() != null && requestConfig.headers().isEnabled()) {
+        if (requestConfig != null
+                && requestConfig.headers() != null
+                && requestConfig.headers().isEnabled()) {
             builder = addRequestHeaders(builder, request, requestConfig.headers());
         }
         builder.addKeyValue(HttpLoggingKeys.METHOD, request.getMethod())
@@ -141,7 +145,11 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
                 .log("Incoming HTTP request");
     }
 
-    private void logResponse(HttpServletRequest request, ContentCachingResponseWrapper response, boolean logPayload, ResponseConfig responseConfig) {
+    private void logResponse(
+            HttpServletRequest request,
+            ContentCachingResponseWrapper response,
+            boolean logPayload,
+            ResponseConfig responseConfig) {
         var builder = log.atInfo();
         if (logPayload) {
             byte[] body = response.getContentAsByteArray();
@@ -152,7 +160,9 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
                 }
             }
         }
-        if (responseConfig != null && responseConfig.headers() != null && responseConfig.headers().isEnabled()) {
+        if (responseConfig != null
+                && responseConfig.headers() != null
+                && responseConfig.headers().isEnabled()) {
             builder = addResponseHeaders(builder, response, responseConfig.headers());
         }
         builder.addKeyValue(HttpLoggingKeys.METHOD, request.getMethod())
@@ -163,7 +173,8 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
 
     /// Parses `raw` as JSON when possible and attaches it under `key`; falls back to the raw
     /// string for non-JSON bodies (plain text, form data, etc.).
-    private org.slf4j.spi.LoggingEventBuilder addPayload(org.slf4j.spi.LoggingEventBuilder builder, String raw, String key) {
+    private org.slf4j.spi.LoggingEventBuilder addPayload(
+            org.slf4j.spi.LoggingEventBuilder builder, String raw, String key) {
         try {
             return builder.addKeyValue(key, jsonMapper.readValue(raw, Object.class));
         } catch (JacksonException e) {
@@ -175,9 +186,7 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
     /// attaches them as a map under [HttpLoggingKeys.REQUEST_HEADERS].
     /// Returns `builder` unchanged when no headers pass the filter or enumeration is unavailable.
     private LoggingEventBuilder addRequestHeaders(
-            LoggingEventBuilder builder,
-            HttpServletRequest request,
-            LoggingProperties.HeadersConfig headersConfig) {
+            LoggingEventBuilder builder, HttpServletRequest request, LoggingProperties.HeadersConfig headersConfig) {
         var headerNames = request.getHeaderNames();
         if (headerNames == null) {
             return builder;

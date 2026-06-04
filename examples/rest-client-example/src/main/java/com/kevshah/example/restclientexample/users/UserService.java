@@ -2,11 +2,10 @@ package com.kevshah.example.restclientexample.users;
 
 import com.kevshah.platform.starter.rest.client.PlatformRestClient;
 import com.kevshah.platform.starter.rest.client.PlatformRestClientRegistry;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.stereotype.Service;
 
 /// Service that fetches users from the JSONPlaceholder API via the `users-client`
 /// configured under `platform.rest.client.clients.users-client`.
@@ -29,8 +28,7 @@ public class UserService {
     ///
     /// @return list of users
     public List<User> listUsers() {
-        return usersClient.get("list-users", new ParameterizedTypeReference<>() {
-        });
+        return usersClient.get("list-users", new ParameterizedTypeReference<>() {});
     }
 
     /// Returns a single user by their numeric identifier.
@@ -44,10 +42,9 @@ public class UserService {
         return usersClient.get("get-user", Map.of("id", id), User.class);
     }
 
-
     /// Creates a new user with the given details.
     ///
-    /// The user details are sent as JSON in the request body, and the created user is returned in the response body.
+    /// The user details are sent as JSON in the request body, and returned in the response body.
     ///
     /// @param user the user details for the new user
     /// @return the created user
@@ -55,14 +52,10 @@ public class UserService {
         return usersClient.post("create-user", user, User.class);
     }
 
-
     /// Delete a user by their identifier
     ///
     /// @param id the user identifier
     public void deleteUser(int id) {
         usersClient.delete("delete-user", Map.of("id", id));
     }
-
-
 }
-

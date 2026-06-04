@@ -1,5 +1,12 @@
 package com.kevshah.platform.starter.rest.server.filter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -12,7 +19,11 @@ import com.kevshah.platform.starter.rest.server.config.LoggingProperties.Respons
 import com.kevshah.platform.starter.rest.server.config.RestServerProperties;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -21,23 +32,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import tools.jackson.databind.json.JsonMapper;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class StandardRequestResponseLoggingFilterTest {
@@ -77,19 +76,24 @@ class StandardRequestResponseLoggingFilterTest {
     /// the body is pre-buffered, so the chain just reads from the replayable stream.
     private void setupChainToReadRequestBody() throws Exception {
         doAnswer(invocation -> {
-            HttpServletRequest req = (HttpServletRequest) invocation.getArgument(0);
-            req.getInputStream().readAllBytes();
-            return null;
-        }).when(filterChain).doFilter(any(), any());
+                    HttpServletRequest req = (HttpServletRequest) invocation.getArgument(0);
+                    req.getInputStream().readAllBytes();
+                    return null;
+                })
+                .when(filterChain)
+                .doFilter(any(), any());
     }
 
-    /// Simulates downstream writing `body` to the response so `ContentCachingResponseWrapper.getContentAsByteArray()` returns content.
+    /// Simulates downstream writing `body` to the response so `ContentCachingResponseWrapper.getContentAsByteArray()`
+    /// returns content.
     private void setupChainToWriteResponseBody(byte[] body) throws Exception {
         doAnswer(invocation -> {
-            ContentCachingResponseWrapper wrapped = (ContentCachingResponseWrapper) invocation.getArgument(1);
-            wrapped.getOutputStream().write(body);
-            return null;
-        }).when(filterChain).doFilter(any(), any());
+                    ContentCachingResponseWrapper wrapped = (ContentCachingResponseWrapper) invocation.getArgument(1);
+                    wrapped.getOutputStream().write(body);
+                    return null;
+                })
+                .when(filterChain)
+                .doFilter(any(), any());
     }
 
     // -------------------------------------------------------------------------
@@ -148,9 +152,11 @@ class StandardRequestResponseLoggingFilterTest {
         }
 
         @Test
-        void givenLoggingEnabledWithRequestPayloadRule_whenFiltering_thenRequestWrappedForBodyBuffering() throws Exception {
+        void givenLoggingEnabledWithRequestPayloadRule_whenFiltering_thenRequestWrappedForBodyBuffering()
+                throws Exception {
             // Given – a rule enables request payload logging → CachedBodyRequestWrapper is used
-            LoggingRule rule = new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/orders");
             request.setContent("{\"item\":\"book\"}".getBytes());
@@ -228,7 +234,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenJsonBodyAndRequestPayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
             // Given – catch-all rule with request payload logging on
-            LoggingRule rule = new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/orders");
             request.setContent("{\"item\":\"book\",\"qty\":2}".getBytes());
@@ -243,7 +250,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenNonJsonBodyAndRequestPayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/upload");
             request.setContent("plain text payload".getBytes());
@@ -258,7 +266,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenEmptyBodyAndRequestPayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -270,7 +279,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenRequestPayloadLoggingDisabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
             // Given – rule matched but request payload logging is off
-            LoggingRule rule = new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(false), null), null);
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(false), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/orders");
             request.setContent("{\"item\":\"book\"}".getBytes());
@@ -289,9 +299,11 @@ class StandardRequestResponseLoggingFilterTest {
     class ResponsePayloadBodyTests {
 
         @Test
-        void givenJsonResponseAndResponsePayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
+        void givenJsonResponseAndResponsePayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown()
+                throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders/1");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -302,9 +314,11 @@ class StandardRequestResponseLoggingFilterTest {
         }
 
         @Test
-        void givenNonJsonResponseAndResponsePayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
+        void givenNonJsonResponseAndResponsePayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown()
+                throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/ping");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -315,9 +329,11 @@ class StandardRequestResponseLoggingFilterTest {
         }
 
         @Test
-        void givenEmptyResponseBodyAndResponsePayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
+        void givenEmptyResponseBodyAndResponsePayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown()
+                throws Exception {
             // Given – no body written by downstream
-            LoggingRule rule = new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("DELETE", "/api/orders/1");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -329,7 +345,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenResponsePayloadLoggingDisabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
             // Given – response payload logging is explicitly off
-            LoggingRule rule = new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(false), null));
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(false), null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders/1");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -340,10 +357,12 @@ class StandardRequestResponseLoggingFilterTest {
         }
 
         @Test
-        void givenResponsePayloadLoggingEnabled_whenFiltering_thenResponseBodyIsCopiedBackToActualResponse() throws Exception {
+        void givenResponsePayloadLoggingEnabled_whenFiltering_thenResponseBodyIsCopiedBackToActualResponse()
+                throws Exception {
             // Given
             byte[] responseBody = "{\"orderId\":42}".getBytes();
-            LoggingRule rule = new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders/42");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -359,7 +378,10 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenBothRequestAndResponsePayloadLoggingEnabled_whenFiltering_thenNoExceptionIsThrown() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null,
+            LoggingRule rule = new LoggingRule(
+                    "/**",
+                    null,
+                    null,
                     new RequestConfig(true, new PayloadConfig(true), null),
                     new ResponseConfig(true, new PayloadConfig(true), null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
@@ -368,12 +390,14 @@ class StandardRequestResponseLoggingFilterTest {
             request.setContentType("application/json");
             MockHttpServletResponse response = new MockHttpServletResponse();
             doAnswer(invocation -> {
-                HttpServletRequest req = (HttpServletRequest) invocation.getArgument(0);
-                req.getInputStream().readAllBytes();
-                ContentCachingResponseWrapper resp = (ContentCachingResponseWrapper) invocation.getArgument(1);
-                resp.getOutputStream().write("{\"orderId\":99}".getBytes());
-                return null;
-            }).when(filterChain).doFilter(any(), any());
+                        HttpServletRequest req = (HttpServletRequest) invocation.getArgument(0);
+                        req.getInputStream().readAllBytes();
+                        ContentCachingResponseWrapper resp = (ContentCachingResponseWrapper) invocation.getArgument(1);
+                        resp.getOutputStream().write("{\"orderId\":99}".getBytes());
+                        return null;
+                    })
+                    .when(filterChain)
+                    .doFilter(any(), any());
 
             // When / Then
             assertThatNoException().isThrownBy(() -> filter.doFilter(request, response, filterChain));
@@ -409,9 +433,10 @@ class StandardRequestResponseLoggingFilterTest {
         void givenMethodScopedSilenceRule_whenMethodDoesNotMatch_thenFilterChainIsStillCalled() throws Exception {
             // Given – silence only GET /api/**; POST should continue normally
             LoggingRule silenceGetRule = new LoggingRule("/api/**", List.of("GET"), false, null, null);
-            LoggingRule logPostRule = new LoggingRule("/api/**", List.of("POST"), null, new RequestConfig(true, new PayloadConfig(true), null), null);
-            StandardRequestResponseLoggingFilter filter = filterWith(
-                    loggingEnabledWithRules(List.of(silenceGetRule, logPostRule)));
+            LoggingRule logPostRule = new LoggingRule(
+                    "/api/**", List.of("POST"), null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            StandardRequestResponseLoggingFilter filter =
+                    filterWith(loggingEnabledWithRules(List.of(silenceGetRule, logPostRule)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/orders");
             request.setContent("{\"item\":\"book\"}".getBytes());
             request.setContentType("application/json");
@@ -425,7 +450,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenRequestMatchesRule_whenPayloadLoggingEnabled_thenNoExceptionIsThrown() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/api/**", List.of("POST"), null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            LoggingRule rule = new LoggingRule(
+                    "/api/**", List.of("POST"), null, new RequestConfig(true, new PayloadConfig(true), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/orders");
             request.setContent("{\"item\":\"book\"}".getBytes());
@@ -440,8 +466,12 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenRequestDoesNotMatchAnyRule_whenFiltering_thenBasicLoggingOccursWithoutPayload() throws Exception {
             // Given – rule only covers POST/PUT; a GET request matches no rule
-            LoggingRule rule = new LoggingRule("/api/orders/**", List.of("POST", "PUT"), null,
-                    new RequestConfig(true, new PayloadConfig(true), null), null);
+            LoggingRule rule = new LoggingRule(
+                    "/api/orders/**",
+                    List.of("POST", "PUT"),
+                    null,
+                    new RequestConfig(true, new PayloadConfig(true), null),
+                    null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -457,9 +487,10 @@ class StandardRequestResponseLoggingFilterTest {
             // Given – /api/internal/** is silenced; broader /api/** enables payload logging.
             //         Rule ordering means the silence rule is checked first.
             LoggingRule silenceInternal = new LoggingRule("/api/internal/**", null, false, null, null);
-            LoggingRule logAll = new LoggingRule("/api/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
-            StandardRequestResponseLoggingFilter filter = filterWith(
-                    loggingEnabledWithRules(List.of(silenceInternal, logAll)));
+            LoggingRule logAll = new LoggingRule(
+                    "/api/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            StandardRequestResponseLoggingFilter filter =
+                    filterWith(loggingEnabledWithRules(List.of(silenceInternal, logAll)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/internal/config");
             request.setContent("{\"secret\":\"value\"}".getBytes());
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -476,7 +507,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenCatchAllRule_whenAnyPathRequested_thenPayloadLoggingApplies() throws Exception {
             // Given – a single catch-all rule enables payload logging for everything
-            LoggingRule catchAll = new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            LoggingRule catchAll =
+                    new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(catchAll)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/anything/at/all");
             request.setContent("{\"data\":true}".getBytes());
@@ -497,7 +529,8 @@ class StandardRequestResponseLoggingFilterTest {
     class PerDirectionEnabledTests {
 
         @Test
-        void givenRequestConfigEnabledFalse_whenFiltering_thenOriginalRequestPassedToChainAndFilterChainCalled() throws Exception {
+        void givenRequestConfigEnabledFalse_whenFiltering_thenOriginalRequestPassedToChainAndFilterChainCalled()
+                throws Exception {
             // Given – rule suppresses the request log entry only; response is still logged
             LoggingRule rule = new LoggingRule("/**", null, null, new RequestConfig(false, null, null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
@@ -514,7 +547,8 @@ class StandardRequestResponseLoggingFilterTest {
         }
 
         @Test
-        void givenResponseConfigEnabledFalse_whenFiltering_thenFilterChainCalledAndNoExceptionIsThrown() throws Exception {
+        void givenResponseConfigEnabledFalse_whenFiltering_thenFilterChainCalledAndNoExceptionIsThrown()
+                throws Exception {
             // Given – rule suppresses the response log entry only; request is still logged
             LoggingRule rule = new LoggingRule("/**", null, null, null, new ResponseConfig(false, null, null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
@@ -530,9 +564,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void givenBothDirectionsDisabled_whenFiltering_thenResponseBodyStillCopiedBack() throws Exception {
             // Given – both request and response log entries suppressed
-            LoggingRule rule = new LoggingRule("/**", null, null,
-                    new RequestConfig(false, null, null),
-                    new ResponseConfig(false, null, null));
+            LoggingRule rule = new LoggingRule(
+                    "/**", null, null, new RequestConfig(false, null, null), new ResponseConfig(false, null, null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             byte[] body = "{\"ok\":true}".getBytes();
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/status");
@@ -594,11 +627,13 @@ class StandardRequestResponseLoggingFilterTest {
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders/1");
             MockHttpServletResponse response = new MockHttpServletResponse();
             doAnswer(invocation -> {
-                ContentCachingResponseWrapper resp = (ContentCachingResponseWrapper) invocation.getArgument(1);
-                resp.addHeader("X-Request-Id", "req-42");
-                resp.getOutputStream().write("{\"orderId\":1}".getBytes());
-                return null;
-            }).when(filterChain).doFilter(any(), any());
+                        ContentCachingResponseWrapper resp = (ContentCachingResponseWrapper) invocation.getArgument(1);
+                        resp.addHeader("X-Request-Id", "req-42");
+                        resp.getOutputStream().write("{\"orderId\":1}".getBytes());
+                        return null;
+                    })
+                    .when(filterChain)
+                    .doFilter(any(), any());
 
             // When / Then
             assertThatNoException().isThrownBy(() -> filter.doFilter(request, response, filterChain));
@@ -631,8 +666,8 @@ class StandardRequestResponseLoggingFilterTest {
 
         @BeforeEach
         void setUp() {
-            filterLogger = (ch.qos.logback.classic.Logger)
-                    LoggerFactory.getLogger(StandardRequestResponseLoggingFilter.class);
+            filterLogger =
+                    (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(StandardRequestResponseLoggingFilter.class);
             filterLogger.setLevel(Level.DEBUG);
             listAppender = new ListAppender<>();
             listAppender.start();
@@ -659,11 +694,11 @@ class StandardRequestResponseLoggingFilterTest {
                     .filter(e -> "Incoming HTTP request".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
-            assertThat(keys).containsExactlyInAnyOrder(
-                    "platform.rest-server.http.request.method",
-                    "platform.rest-server.http.request.url"
-            );
+            var keys =
+                    requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            assertThat(keys)
+                    .containsExactlyInAnyOrder(
+                            "platform.rest-server.http.request.method", "platform.rest-server.http.request.url");
         }
 
         @Test
@@ -702,12 +737,14 @@ class StandardRequestResponseLoggingFilterTest {
                     .filter(e -> "Outgoing HTTP response".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = responseEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
-            assertThat(keys).containsExactlyInAnyOrder(
-                    "platform.rest-server.http.request.method",
-                    "platform.rest-server.http.request.url",
-                    "platform.rest-server.http.response.status"
-            );
+            var keys = responseEvent.getKeyValuePairs().stream()
+                    .map(kvp -> kvp.key)
+                    .toList();
+            assertThat(keys)
+                    .containsExactlyInAnyOrder(
+                            "platform.rest-server.http.request.method",
+                            "platform.rest-server.http.request.url",
+                            "platform.rest-server.http.response.status");
         }
 
         @Test
@@ -733,7 +770,8 @@ class StandardRequestResponseLoggingFilterTest {
         @Test
         void doFilter_requestPayloadLoggingEnabled_requestBodyKeyPresentInRequestLog() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(true), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/orders");
             request.setContent("{\"item\":\"book\"}".getBytes());
@@ -749,14 +787,16 @@ class StandardRequestResponseLoggingFilterTest {
                     .filter(e -> "Incoming HTTP request".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys =
+                    requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
             assertThat(keys).contains("platform.rest-server.http.request.body");
         }
 
         @Test
         void doFilter_requestPayloadLoggingDisabled_requestBodyKeyAbsentFromRequestLog() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(false), null), null);
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, new RequestConfig(true, new PayloadConfig(false), null), null);
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/orders");
             request.setContent("{\"item\":\"book\"}".getBytes());
@@ -770,14 +810,16 @@ class StandardRequestResponseLoggingFilterTest {
                     .filter(e -> "Incoming HTTP request".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys =
+                    requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
             assertThat(keys).doesNotContain("platform.rest-server.http.request.body");
         }
 
         @Test
         void doFilter_responsePayloadLoggingEnabled_responseBodyKeyPresentInResponseLog() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(true), null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders/1");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -791,14 +833,17 @@ class StandardRequestResponseLoggingFilterTest {
                     .filter(e -> "Outgoing HTTP response".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = responseEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys = responseEvent.getKeyValuePairs().stream()
+                    .map(kvp -> kvp.key)
+                    .toList();
             assertThat(keys).contains("platform.rest-server.http.response.body");
         }
 
         @Test
         void doFilter_responsePayloadLoggingDisabled_responseBodyKeyAbsentFromResponseLog() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(false), null));
+            LoggingRule rule =
+                    new LoggingRule("/**", null, null, null, new ResponseConfig(true, new PayloadConfig(false), null));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders/1");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -812,7 +857,9 @@ class StandardRequestResponseLoggingFilterTest {
                     .filter(e -> "Outgoing HTTP response".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = responseEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys = responseEvent.getKeyValuePairs().stream()
+                    .map(kvp -> kvp.key)
+                    .toList();
             assertThat(keys).doesNotContain("platform.rest-server.http.response.body");
         }
 
@@ -834,7 +881,8 @@ class StandardRequestResponseLoggingFilterTest {
                     .filter(e -> "Incoming HTTP request".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys =
+                    requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
             assertThat(keys).contains("platform.rest-server.http.request.headers");
         }
 
@@ -847,10 +895,12 @@ class StandardRequestResponseLoggingFilterTest {
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders/1");
             MockHttpServletResponse response = new MockHttpServletResponse();
             doAnswer(invocation -> {
-                ContentCachingResponseWrapper resp = (ContentCachingResponseWrapper) invocation.getArgument(1);
-                resp.addHeader("X-Request-Id", "req-42");
-                return null;
-            }).when(filterChain).doFilter(any(), any());
+                        ContentCachingResponseWrapper resp = (ContentCachingResponseWrapper) invocation.getArgument(1);
+                        resp.addHeader("X-Request-Id", "req-42");
+                        return null;
+                    })
+                    .when(filterChain)
+                    .doFilter(any(), any());
 
             // When
             filter.doFilter(request, response, filterChain);
@@ -860,14 +910,19 @@ class StandardRequestResponseLoggingFilterTest {
                     .filter(e -> "Outgoing HTTP response".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = responseEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys = responseEvent.getKeyValuePairs().stream()
+                    .map(kvp -> kvp.key)
+                    .toList();
             assertThat(keys).contains("platform.rest-server.http.response.headers");
         }
 
         @Test
         void doFilter_headerLoggingDisabled_headerKeysAbsentFromBothLogEntries() throws Exception {
             // Given
-            LoggingRule rule = new LoggingRule("/**", null, null,
+            LoggingRule rule = new LoggingRule(
+                    "/**",
+                    null,
+                    null,
                     new RequestConfig(true, null, new HeadersConfig(false, null, null)),
                     new ResponseConfig(true, null, new HeadersConfig(false, null, null)));
             StandardRequestResponseLoggingFilter filter = filterWith(loggingEnabledWithRules(List.of(rule)));
@@ -882,10 +937,10 @@ class StandardRequestResponseLoggingFilterTest {
             assertThat(listAppender.list).hasSize(2);
             for (var event : listAppender.list) {
                 var keys = event.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
-                assertThat(keys).doesNotContain(
-                        "platform.rest-server.http.request.headers",
-                        "platform.rest-server.http.response.headers"
-                );
+                assertThat(keys)
+                        .doesNotContain(
+                                "platform.rest-server.http.request.headers",
+                                "platform.rest-server.http.response.headers");
             }
         }
 

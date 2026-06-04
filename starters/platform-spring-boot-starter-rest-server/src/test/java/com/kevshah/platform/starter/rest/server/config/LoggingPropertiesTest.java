@@ -1,13 +1,12 @@
 package com.kevshah.platform.starter.rest.server.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class LoggingPropertiesTest {
 
@@ -22,11 +21,7 @@ public class LoggingPropertiesTest {
         @ValueSource(strings = {"Content-Type", "X-Request-Id"})
         void givenNullIncludeAndExclude_thenShouldLogAllHeaders(String header) {
             // Given
-            var config = new LoggingProperties.HeadersConfig(
-                    true,
-                    null,
-                    null
-            );
+            var config = new LoggingProperties.HeadersConfig(true, null, null);
 
             // When
             var result = config.shouldLogHeader(header);
@@ -35,15 +30,10 @@ public class LoggingPropertiesTest {
             assertThat(result).isTrue();
         }
 
-
         @Test
         void givenExcludeList_thenShouldNotLogExcludedHeaders() {
             // Given
-            var config = new LoggingProperties.HeadersConfig(
-                    true,
-                    null,
-                    List.of("Authorization", "Cookie")
-            );
+            var config = new LoggingProperties.HeadersConfig(true, null, List.of("Authorization", "Cookie"));
 
             // When
             var shouldLogAuth = config.shouldLogHeader("Authorization");
@@ -56,15 +46,10 @@ public class LoggingPropertiesTest {
             assertThat(shouldLogContentType).isTrue();
         }
 
-
         @Test
         void givenIncludeList_thenShouldLogHeaders() {
             // Given
-            var config = new LoggingProperties.HeadersConfig(
-                    true,
-                    List.of("Content-Type", "X-Request-Id"),
-                    null
-            );
+            var config = new LoggingProperties.HeadersConfig(true, List.of("Content-Type", "X-Request-Id"), null);
 
             // When
             var shouldLogContentType = config.shouldLogHeader("Content-Type");
@@ -77,15 +62,11 @@ public class LoggingPropertiesTest {
             assertThat(shouldLogAuthorization).isFalse();
         }
 
-
         @Test
         void givenIncludeAndExclude_thenShouldLogOnlyIncludedAndNotExcludedHeaders() {
             // Given
             var config = new LoggingProperties.HeadersConfig(
-                    true,
-                    List.of("Content-Type", "X-Request-Id"),
-                    List.of("Authorization")
-            );
+                    true, List.of("Content-Type", "X-Request-Id"), List.of("Authorization"));
 
             // When
             var shouldLogContentType = config.shouldLogHeader("Content-Type");
@@ -96,19 +77,15 @@ public class LoggingPropertiesTest {
             // Then
             assertThat(shouldLogContentType).isTrue();
             assertThat(shouldLogRequestId).isTrue();
-            assertThat(shouldLogAuthorization).isFalse();  // Excluded even though it's in the include list
-            assertThat(shouldLogCookie).isFalse();         // Not included and not excluded, so defaults to false
+            assertThat(shouldLogAuthorization).isFalse(); // Excluded even though it's in the include list
+            assertThat(shouldLogCookie).isFalse(); // Not included and not excluded, so defaults to false
         }
-
 
         @Test
         void givenDisabled_thenShouldNotLogAnyHeaders() {
             // Given
             var config = new LoggingProperties.HeadersConfig(
-                    false,
-                    List.of("Content-Type", "X-Request-Id"),
-                    List.of("Authorization")
-            );
+                    false, List.of("Content-Type", "X-Request-Id"), List.of("Authorization"));
 
             // When
             var shouldLogContentType = config.shouldLogHeader("Content-Type");
@@ -120,9 +97,5 @@ public class LoggingPropertiesTest {
             assertThat(shouldLogRequestId).isFalse();
             assertThat(shouldLogAuthorization).isFalse();
         }
-
-
     }
-
-
 }

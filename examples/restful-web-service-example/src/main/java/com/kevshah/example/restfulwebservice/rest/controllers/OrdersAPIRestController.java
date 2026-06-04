@@ -7,6 +7,10 @@ import com.kevshah.example.restfulwebservice.rest.responses.CreateOrderResponse;
 import com.kevshah.example.restfulwebservice.rest.responses.LineItem;
 import com.kevshah.example.restfulwebservice.rest.responses.OrderResponse;
 import com.kevshah.example.restfulwebservice.rest.responses.ShippingInfo;
+import java.net.URI;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,24 +19,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/v1")
 public class OrdersAPIRestController {
-
 
     @PostMapping("/orders")
     public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest createOrderRequest) {
         // Returning a mocked response
         String orderId = UUID.ofEpochMillis(Instant.now().toEpochMilli()).toString();
-        return ResponseEntity.created(URI.create("/api/v1/orders/" + orderId))
-                .body(new CreateOrderResponse(orderId));
+        return ResponseEntity.created(URI.create("/api/v1/orders/" + orderId)).body(new CreateOrderResponse(orderId));
     }
-
 
     @GetMapping("/orders/{orderId}")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable String orderId) {
@@ -43,8 +39,7 @@ public class OrdersAPIRestController {
                         .lineId(UUID.ofEpochMillis(Instant.now().toEpochMilli()).toString())
                         .sku("SKU-123")
                         .quantity(2)
-                        .build()
-                ))
+                        .build()))
                 .billing(BillingInfo.builder()
                         .firstName("First")
                         .lastName("Last")
@@ -70,11 +65,8 @@ public class OrdersAPIRestController {
                                 .regionCode("BC")
                                 .postalCode("V6B 6B1")
                                 .countryCode("CA")
-                                .build()
-                        )
+                                .build())
                         .build())
                 .build());
     }
-
-
 }

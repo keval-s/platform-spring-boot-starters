@@ -1,6 +1,10 @@
 package com.kevshah.platform.starter.rest.client.logging;
 
 import com.kevshah.platform.starter.rest.client.config.LoggingProperties;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,11 +16,6 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 /// `ClientHttpRequestInterceptor` that emits structured SLF4J log entries for outbound
 /// REST client calls.
@@ -63,10 +62,11 @@ public final class RestClientLoggingInterceptor implements ClientHttpRequestInte
     /// @throws IOException if the request execution fails
     @Override
     @NullMarked
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-                                        ClientHttpRequestExecution execution) throws IOException {
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+            throws IOException {
         var loggingContext = (LoggingContext) request.getAttributes().get(ATTRIBUTE_KEY);
-        if (loggingContext == null || !Boolean.TRUE.equals(loggingContext.config().enabled())) {
+        if (loggingContext == null
+                || !Boolean.TRUE.equals(loggingContext.config().enabled())) {
             return execution.execute(request, body);
         }
 
@@ -81,19 +81,30 @@ public final class RestClientLoggingInterceptor implements ClientHttpRequestInte
 
         if (isResponsePayloadLoggingEnabled(config)) {
             var buffered = new BufferingClientHttpResponse(rawResponse);
-            logResponse(request, buffered.getStatusCode(), buffered.getHeaders(),
-                    buffered.getBodyAsString(), loggingContext, durationMs, level);
+            logResponse(
+                    request,
+                    buffered.getStatusCode(),
+                    buffered.getHeaders(),
+                    buffered.getBodyAsString(),
+                    loggingContext,
+                    durationMs,
+                    level);
             return buffered;
         }
 
-        logResponse(request, rawResponse.getStatusCode(), rawResponse.getHeaders(),
-                null, loggingContext, durationMs, level);
+        logResponse(
+                request,
+                rawResponse.getStatusCode(),
+                rawResponse.getHeaders(),
+                null,
+                loggingContext,
+                durationMs,
+                level);
         return rawResponse;
     }
 
     // Logs the outgoing request as a structured entry.
-    private static void logRequest(HttpRequest request, byte[] body,
-                                   LoggingContext ctx, Level level) {
+    private static void logRequest(HttpRequest request, byte[] body, LoggingContext ctx, Level level) {
         var config = ctx.config();
         var builder = log.atLevel(level)
                 .addKeyValue(HttpLoggingKeys.CLIENT_NAME, ctx.clientName())
@@ -107,16 +118,21 @@ public final class RestClientLoggingInterceptor implements ClientHttpRequestInte
             builder = builder.addKeyValue(HttpLoggingKeys.REQUEST_HEADERS, filteredHeaders.toString());
         }
         if (isRequestPayloadLoggingEnabled(config) && body != null && body.length > 0) {
-            builder = builder.addKeyValue(HttpLoggingKeys.REQUEST_BODY,
-                    new String(body, StandardCharsets.UTF_8));
+            builder = builder.addKeyValue(HttpLoggingKeys.REQUEST_BODY, new String(body, StandardCharsets.UTF_8));
         }
         builder.log("REST client request");
     }
 
     // Logs the received response as a structured entry.
-    private static void logResponse(HttpRequest request, HttpStatusCode statusCode,
-                                    HttpHeaders headers, String responseBody,
-                                    LoggingContext ctx, long durationMs, Level level) throws IOException {
+    private static void logResponse(
+            HttpRequest request,
+            HttpStatusCode statusCode,
+            HttpHeaders headers,
+            String responseBody,
+            LoggingContext ctx,
+            long durationMs,
+            Level level)
+            throws IOException {
         var config = ctx.config();
         var builder = log.atLevel(level)
                 .addKeyValue(HttpLoggingKeys.CLIENT_NAME, ctx.clientName())
@@ -180,8 +196,7 @@ public final class RestClientLoggingInterceptor implements ClientHttpRequestInte
     }
 
     // Returns a new HttpHeaders containing only the entries that pass the HeadersConfig filter.
-    private static HttpHeaders filterHeaders(HttpHeaders source,
-                                             LoggingProperties.HeadersConfig headersConfig) {
+    private static HttpHeaders filterHeaders(HttpHeaders source, LoggingProperties.HeadersConfig headersConfig) {
         var filtered = new HttpHeaders();
         source.forEach((name, values) -> {
             if (headersConfig.shouldLogHeader(name)) {
@@ -236,6 +251,3 @@ public final class RestClientLoggingInterceptor implements ClientHttpRequestInte
         }
     }
 }
-
-
-

@@ -8,6 +8,5 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 ///
 /// @param logging Configuration properties for request/response logging. See [LoggingProperties].
 @ConfigurationProperties(prefix = "platform.rest.server")
-public record RestServerProperties(@NestedConfigurationProperty LoggingProperties logging) {
-
-}
+public record RestServerProperties(
+        @NestedConfigurationProperty LoggingProperties logging) {}

@@ -35,4 +35,3 @@ final class TestFixtures {
     /// Response body carrying a `status` field — returned by status-oriented endpoints.
     record StatusResponse(String status) {}
 }
-

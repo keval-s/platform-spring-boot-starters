@@ -18,11 +18,7 @@ import java.util.List;
 ///                 logged beyond the basic structured fields.
 /// @param response Response logging settings. When `null`, no response payload or headers are
 ///                 logged beyond the basic structured fields.
-public record LoggingProperties(
-        Boolean enabled,
-        String level,
-        RequestConfig request,
-        ResponseConfig response) {
+public record LoggingProperties(Boolean enabled, String level, RequestConfig request, ResponseConfig response) {
 
     /// Merges two `LoggingProperties` instances, with `override` taking precedence over `base`.
     ///
@@ -48,8 +44,7 @@ public record LoggingProperties(
                 override.enabled() != null ? override.enabled() : base.enabled(),
                 override.level() != null ? override.level() : base.level(),
                 mergeRequestConfig(base.request(), override.request()),
-                mergeResponseConfig(base.response(), override.response())
-        );
+                mergeResponseConfig(base.response(), override.response()));
     }
 
     // Merges two RequestConfig values, preferring non-null fields from override.
@@ -65,8 +60,7 @@ public record LoggingProperties(
         }
         return new RequestConfig(
                 override.payload() != null ? override.payload() : base.payload(),
-                override.headers() != null ? override.headers() : base.headers()
-        );
+                override.headers() != null ? override.headers() : base.headers());
     }
 
     // Merges two ResponseConfig values, preferring non-null fields from override.
@@ -82,21 +76,14 @@ public record LoggingProperties(
         }
         return new ResponseConfig(
                 override.payload() != null ? override.payload() : base.payload(),
-                override.headers() != null ? override.headers() : base.headers()
-        );
+                override.headers() != null ? override.headers() : base.headers());
     }
-
 
     /// Configuration for request logging settings.
     ///
     /// @param payload Request body logging settings. When `null`, the request body is not logged.
     /// @param headers Request header logging settings. When `null`, no request headers are logged.
-    public record RequestConfig(
-            PayloadConfig payload,
-            HeadersConfig headers
-    ) {
-    }
-
+    public record RequestConfig(PayloadConfig payload, HeadersConfig headers) {}
 
     /// Configuration for response logging settings.
     ///
@@ -104,12 +91,7 @@ public record LoggingProperties(
     ///                logged. Enabling payload logging buffers the entire response body in memory
     ///                before it is handed to the deserialiser.
     /// @param headers Response header logging settings. When `null`, no response headers are logged.
-    public record ResponseConfig(
-            PayloadConfig payload,
-            HeadersConfig headers
-    ) {
-    }
-
+    public record ResponseConfig(PayloadConfig payload, HeadersConfig headers) {}
 
     /// Configuration for payload (request or response body) logging.
     ///
@@ -123,7 +105,6 @@ public record LoggingProperties(
         }
     }
 
-
     /// Configuration for header logging.
     ///
     /// @param enabled  Set to `true` to capture and include headers in the log entry.
@@ -133,11 +114,7 @@ public record LoggingProperties(
     /// @param exclude  List of header names to exclude from the log entry. When empty or `null`,
     ///                 no headers are excluded. If a header appears in both `include` and
     ///                 `exclude`, it is excluded.
-    public record HeadersConfig(
-            Boolean enabled,
-            List<String> include,
-            List<String> exclude
-    ) {
+    public record HeadersConfig(Boolean enabled, List<String> include, List<String> exclude) {
 
         /// Returns `true` when header logging is switched on.
         public boolean isEnabled() {

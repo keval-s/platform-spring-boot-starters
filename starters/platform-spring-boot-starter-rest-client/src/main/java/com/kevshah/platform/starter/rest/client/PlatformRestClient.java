@@ -3,15 +3,14 @@ package com.kevshah.platform.starter.rest.client;
 import com.kevshah.platform.starter.rest.client.config.EndpointProperties;
 import com.kevshah.platform.starter.rest.client.logging.LoggingContext;
 import com.kevshah.platform.starter.rest.client.logging.RestClientLoggingInterceptor;
+import java.net.URI;
+import java.util.Map;
+import java.util.function.Function;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
-
-import java.net.URI;
-import java.util.Map;
-import java.util.function.Function;
 
 /// A high-level REST client scoped to a single named client configuration.
 ///
@@ -58,38 +57,37 @@ public final class PlatformRestClient {
     /// URI template variables in the endpoint path (e.g. `/api/v1/payments/{id}`) are
     /// expanded using `uriVariables`. The call is wrapped in the client's retry policy.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
     /// @param body         Request body to attach to the request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
-    public <T> T exchange(String endpointName, Object body, Map<String, ?> uriVariables,
-                          Class<T> responseType) {
+    public <T> T exchange(String endpointName, Object body, Map<String, ?> uriVariables, Class<T> responseType) {
         return doExchange(endpointName, null, body, uriVariables, null, spec -> spec.body(responseType));
     }
 
     /// Invokes the named endpoint using its configured HTTP method, merging the supplied headers
     /// into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
     /// @param body         Request body to attach to the request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
-    public <T> T exchange(String endpointName, Object body, Map<String, ?> uriVariables,
-                          HttpHeaders headers, Class<T> responseType) {
+    public <T> T exchange(
+            String endpointName, Object body, Map<String, ?> uriVariables, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, null, body, uriVariables, headers, spec -> spec.body(responseType));
     }
 
     /// Invokes the named endpoint using its configured HTTP method, with no URI variables.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
     /// @param body         Request body to attach to the request.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T exchange(String endpointName, Object body, Class<T> responseType) {
         return doExchange(endpointName, null, body, null, null, spec -> spec.body(responseType));
@@ -98,11 +96,11 @@ public final class PlatformRestClient {
     /// Invokes the named endpoint using its configured HTTP method, with no URI variables,
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
     /// @param body         Request body to attach to the request.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T exchange(String endpointName, Object body, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, null, body, null, headers, spec -> spec.body(responseType));
@@ -110,9 +108,9 @@ public final class PlatformRestClient {
 
     /// Invokes the named endpoint using its configured HTTP method, with no body or URI variables.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T exchange(String endpointName, Class<T> responseType) {
         return doExchange(endpointName, null, null, null, null, spec -> spec.body(responseType));
@@ -121,10 +119,10 @@ public final class PlatformRestClient {
     /// Invokes the named endpoint using its configured HTTP method, with no body or URI variables,
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T exchange(String endpointName, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, null, null, null, headers, spec -> spec.body(responseType));
@@ -135,14 +133,14 @@ public final class PlatformRestClient {
     /// Accepts a `ParameterizedTypeReference` to support generic response types
     /// such as `List<PaymentResponse>`.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
     /// @param body         Request body to attach to the request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T exchange(String endpointName, Object body, Map<String, ?> uriVariables,
-                          ParameterizedTypeReference<T> responseType) {
+    public <T> T exchange(
+            String endpointName, Object body, Map<String, ?> uriVariables, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, null, body, uriVariables, null, spec -> spec.body(responseType));
     }
 
@@ -152,15 +150,19 @@ public final class PlatformRestClient {
     /// Accepts a `ParameterizedTypeReference` to support generic response types
     /// such as `List<PaymentResponse>`.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
     /// @param body         Request body to attach to the request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T exchange(String endpointName, Object body, Map<String, ?> uriVariables,
-                          HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
+    public <T> T exchange(
+            String endpointName,
+            Object body,
+            Map<String, ?> uriVariables,
+            HttpHeaders headers,
+            ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, null, body, uriVariables, headers, spec -> spec.body(responseType));
     }
 
@@ -168,13 +170,12 @@ public final class PlatformRestClient {
     ///
     /// Accepts a `ParameterizedTypeReference` to support generic response types.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
     /// @param body         Request body to attach to the request.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T exchange(String endpointName, Object body,
-                          ParameterizedTypeReference<T> responseType) {
+    public <T> T exchange(String endpointName, Object body, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, null, body, null, null, spec -> spec.body(responseType));
     }
 
@@ -183,14 +184,14 @@ public final class PlatformRestClient {
     ///
     /// Accepts a `ParameterizedTypeReference` to support generic response types.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
     /// @param body         Request body to attach to the request.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T exchange(String endpointName, Object body, HttpHeaders headers,
-                          ParameterizedTypeReference<T> responseType) {
+    public <T> T exchange(
+            String endpointName, Object body, HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, null, body, null, headers, spec -> spec.body(responseType));
     }
 
@@ -198,9 +199,9 @@ public final class PlatformRestClient {
     ///
     /// Accepts a `ParameterizedTypeReference` to support generic response types.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
     public <T> T exchange(String endpointName, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, null, null, null, null, spec -> spec.body(responseType));
@@ -211,13 +212,12 @@ public final class PlatformRestClient {
     ///
     /// Accepts a `ParameterizedTypeReference` to support generic response types.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T exchange(String endpointName, HttpHeaders headers,
-                          ParameterizedTypeReference<T> responseType) {
+    public <T> T exchange(String endpointName, HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, null, null, null, headers, spec -> spec.body(responseType));
     }
 
@@ -227,9 +227,9 @@ public final class PlatformRestClient {
 
     /// Performs a GET request to the named endpoint.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T get(String endpointName, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.GET, null, null, null, spec -> spec.body(responseType));
@@ -238,10 +238,10 @@ public final class PlatformRestClient {
     /// Performs a GET request to the named endpoint, merging the supplied headers into the
     /// request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T get(String endpointName, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.GET, null, null, headers, spec -> spec.body(responseType));
@@ -249,10 +249,10 @@ public final class PlatformRestClient {
 
     /// Performs a GET request to the named endpoint, expanding URI template variables.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T get(String endpointName, Map<String, ?> uriVariables, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.GET, null, uriVariables, null, spec -> spec.body(responseType));
@@ -261,22 +261,21 @@ public final class PlatformRestClient {
     /// Performs a GET request to the named endpoint, expanding URI template variables and
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
-    public <T> T get(String endpointName, Map<String, ?> uriVariables, HttpHeaders headers,
-                     Class<T> responseType) {
+    public <T> T get(String endpointName, Map<String, ?> uriVariables, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.GET, null, uriVariables, headers, spec -> spec.body(responseType));
     }
 
     /// Performs a GET request to the named endpoint with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
     public <T> T get(String endpointName, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.GET, null, null, null, spec -> spec.body(responseType));
@@ -285,26 +284,24 @@ public final class PlatformRestClient {
     /// Performs a GET request to the named endpoint with a parameterised response type,
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T get(String endpointName, HttpHeaders headers,
-                     ParameterizedTypeReference<T> responseType) {
+    public <T> T get(String endpointName, HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.GET, null, null, headers, spec -> spec.body(responseType));
     }
 
     /// Performs a GET request to the named endpoint, expanding URI template variables,
     /// with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T get(String endpointName, Map<String, ?> uriVariables,
-                     ParameterizedTypeReference<T> responseType) {
+    public <T> T get(String endpointName, Map<String, ?> uriVariables, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.GET, null, uriVariables, null, spec -> spec.body(responseType));
     }
 
@@ -312,14 +309,17 @@ public final class PlatformRestClient {
     /// merging the supplied headers into the request after endpoint-level headers,
     /// with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T get(String endpointName, Map<String, ?> uriVariables, HttpHeaders headers,
-                     ParameterizedTypeReference<T> responseType) {
+    public <T> T get(
+            String endpointName,
+            Map<String, ?> uriVariables,
+            HttpHeaders headers,
+            ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.GET, null, uriVariables, headers, spec -> spec.body(responseType));
     }
 
@@ -329,10 +329,10 @@ public final class PlatformRestClient {
 
     /// Performs a POST request to the named endpoint with the given request body.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the POST request.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T post(String endpointName, Object body, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.POST, body, null, null, spec -> spec.body(responseType));
@@ -341,11 +341,11 @@ public final class PlatformRestClient {
     /// Performs a POST request to the named endpoint with the given request body, merging
     /// the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the POST request.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T post(String endpointName, Object body, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.POST, body, null, headers, spec -> spec.body(responseType));
@@ -353,11 +353,11 @@ public final class PlatformRestClient {
 
     /// Performs a POST request to the named endpoint, expanding URI template variables.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the POST request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T post(String endpointName, Object body, Map<String, ?> uriVariables, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.POST, body, uriVariables, null, spec -> spec.body(responseType));
@@ -366,24 +366,24 @@ public final class PlatformRestClient {
     /// Performs a POST request to the named endpoint, expanding URI template variables and
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the POST request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
-    public <T> T post(String endpointName, Object body, Map<String, ?> uriVariables,
-                      HttpHeaders headers, Class<T> responseType) {
+    public <T> T post(
+            String endpointName, Object body, Map<String, ?> uriVariables, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.POST, body, uriVariables, headers, spec -> spec.body(responseType));
     }
 
     /// Performs a POST request to the named endpoint with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the POST request.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
     public <T> T post(String endpointName, Object body, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.POST, body, null, null, spec -> spec.body(responseType));
@@ -392,42 +392,46 @@ public final class PlatformRestClient {
     /// Performs a POST request to the named endpoint with a parameterised response type,
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the POST request.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T post(String endpointName, Object body, HttpHeaders headers,
-                      ParameterizedTypeReference<T> responseType) {
+    public <T> T post(
+            String endpointName, Object body, HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.POST, body, null, headers, spec -> spec.body(responseType));
     }
 
     /// Performs a POST request, expanding URI template variables, with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the POST request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T post(String endpointName, Object body, Map<String, ?> uriVariables,
-                      ParameterizedTypeReference<T> responseType) {
+    public <T> T post(
+            String endpointName, Object body, Map<String, ?> uriVariables, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.POST, body, uriVariables, null, spec -> spec.body(responseType));
     }
 
     /// Performs a POST request, expanding URI template variables and merging the supplied
     /// headers into the request after endpoint-level headers, with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the POST request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T post(String endpointName, Object body, Map<String, ?> uriVariables,
-                      HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
+    public <T> T post(
+            String endpointName,
+            Object body,
+            Map<String, ?> uriVariables,
+            HttpHeaders headers,
+            ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.POST, body, uriVariables, headers, spec -> spec.body(responseType));
     }
 
@@ -437,10 +441,10 @@ public final class PlatformRestClient {
 
     /// Performs a PUT request to the named endpoint with the given request body.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PUT request.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T put(String endpointName, Object body, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.PUT, body, null, null, spec -> spec.body(responseType));
@@ -449,11 +453,11 @@ public final class PlatformRestClient {
     /// Performs a PUT request to the named endpoint with the given request body, merging
     /// the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PUT request.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T put(String endpointName, Object body, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.PUT, body, null, headers, spec -> spec.body(responseType));
@@ -461,11 +465,11 @@ public final class PlatformRestClient {
 
     /// Performs a PUT request to the named endpoint, expanding URI template variables.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PUT request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T put(String endpointName, Object body, Map<String, ?> uriVariables, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.PUT, body, uriVariables, null, spec -> spec.body(responseType));
@@ -474,24 +478,24 @@ public final class PlatformRestClient {
     /// Performs a PUT request to the named endpoint, expanding URI template variables and
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PUT request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
-    public <T> T put(String endpointName, Object body, Map<String, ?> uriVariables,
-                     HttpHeaders headers, Class<T> responseType) {
+    public <T> T put(
+            String endpointName, Object body, Map<String, ?> uriVariables, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.PUT, body, uriVariables, headers, spec -> spec.body(responseType));
     }
 
     /// Performs a PUT request to the named endpoint with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PUT request.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
     public <T> T put(String endpointName, Object body, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.PUT, body, null, null, spec -> spec.body(responseType));
@@ -500,42 +504,46 @@ public final class PlatformRestClient {
     /// Performs a PUT request to the named endpoint with a parameterised response type,
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PUT request.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T put(String endpointName, Object body, HttpHeaders headers,
-                     ParameterizedTypeReference<T> responseType) {
+    public <T> T put(
+            String endpointName, Object body, HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.PUT, body, null, headers, spec -> spec.body(responseType));
     }
 
     /// Performs a PUT request, expanding URI template variables, with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PUT request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T put(String endpointName, Object body, Map<String, ?> uriVariables,
-                     ParameterizedTypeReference<T> responseType) {
+    public <T> T put(
+            String endpointName, Object body, Map<String, ?> uriVariables, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.PUT, body, uriVariables, null, spec -> spec.body(responseType));
     }
 
     /// Performs a PUT request, expanding URI template variables and merging the supplied
     /// headers into the request after endpoint-level headers, with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PUT request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T put(String endpointName, Object body, Map<String, ?> uriVariables,
-                     HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
+    public <T> T put(
+            String endpointName,
+            Object body,
+            Map<String, ?> uriVariables,
+            HttpHeaders headers,
+            ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.PUT, body, uriVariables, headers, spec -> spec.body(responseType));
     }
 
@@ -545,10 +553,10 @@ public final class PlatformRestClient {
 
     /// Performs a PATCH request to the named endpoint with the given request body.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PATCH request.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T patch(String endpointName, Object body, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.PATCH, body, null, null, spec -> spec.body(responseType));
@@ -557,11 +565,11 @@ public final class PlatformRestClient {
     /// Performs a PATCH request to the named endpoint with the given request body, merging
     /// the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PATCH request.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T patch(String endpointName, Object body, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.PATCH, body, null, headers, spec -> spec.body(responseType));
@@ -569,11 +577,11 @@ public final class PlatformRestClient {
 
     /// Performs a PATCH request to the named endpoint, expanding URI template variables.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PATCH request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
     public <T> T patch(String endpointName, Object body, Map<String, ?> uriVariables, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.PATCH, body, uriVariables, null, spec -> spec.body(responseType));
@@ -582,24 +590,24 @@ public final class PlatformRestClient {
     /// Performs a PATCH request to the named endpoint, expanding URI template variables and
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PATCH request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType Class of the expected response body type. The response body is deserialized into an instance of this class and returned.
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Class to deserialize the response body into.
     /// @return Deserialized response body of type `responseType`.
-    public <T> T patch(String endpointName, Object body, Map<String, ?> uriVariables,
-                       HttpHeaders headers, Class<T> responseType) {
+    public <T> T patch(
+            String endpointName, Object body, Map<String, ?> uriVariables, HttpHeaders headers, Class<T> responseType) {
         return doExchange(endpointName, HttpMethod.PATCH, body, uriVariables, headers, spec -> spec.body(responseType));
     }
 
     /// Performs a PATCH request to the named endpoint with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PATCH request.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
     public <T> T patch(String endpointName, Object body, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.PATCH, body, null, null, spec -> spec.body(responseType));
@@ -608,42 +616,46 @@ public final class PlatformRestClient {
     /// Performs a PATCH request to the named endpoint with a parameterised response type,
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PATCH request.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T patch(String endpointName, Object body, HttpHeaders headers,
-                       ParameterizedTypeReference<T> responseType) {
+    public <T> T patch(
+            String endpointName, Object body, HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.PATCH, body, null, headers, spec -> spec.body(responseType));
     }
 
     /// Performs a PATCH request, expanding URI template variables, with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PATCH request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T patch(String endpointName, Object body, Map<String, ?> uriVariables,
-                       ParameterizedTypeReference<T> responseType) {
+    public <T> T patch(
+            String endpointName, Object body, Map<String, ?> uriVariables, ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.PATCH, body, uriVariables, null, spec -> spec.body(responseType));
     }
 
     /// Performs a PATCH request, expanding URI template variables and merging the supplied
     /// headers into the request after endpoint-level headers, with a parameterised response type.
     ///
-    /// @param <T>          Type of the expected response body, used for deserialization. This can be a generic type such as `List<PaymentResponse>`, in which case `responseType` should be a `ParameterizedTypeReference<T>`.
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param body         Request body to attach to the PATCH request.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
-    /// @param responseType ParameterizedTypeReference describing the expected response body type. This allows for deserialization of generic types (e.g. `new ParameterizedTypeReference<List<PaymentResponse>>() {}`).
+    /// @param <T>          Expected response type. Used for deserialization.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param body         Request body to attach to the request.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
+    /// @param responseType Generic type reference for response deserialization.
     /// @return Deserialized response body of type `T`.
-    public <T> T patch(String endpointName, Object body, Map<String, ?> uriVariables,
-                       HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
+    public <T> T patch(
+            String endpointName,
+            Object body,
+            Map<String, ?> uriVariables,
+            HttpHeaders headers,
+            ParameterizedTypeReference<T> responseType) {
         return doExchange(endpointName, HttpMethod.PATCH, body, uriVariables, headers, spec -> spec.body(responseType));
     }
 
@@ -653,39 +665,42 @@ public final class PlatformRestClient {
 
     /// Performs a DELETE request to the named endpoint.
     ///
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
+    /// @param endpointName Name of the configured endpoint to invoke.
     public void delete(String endpointName) {
-        doExchange(endpointName, HttpMethod.DELETE, null, null, null,
-                RestClient.ResponseSpec::toBodilessEntity);
+        doExchange(endpointName, HttpMethod.DELETE, null, null, null, RestClient.ResponseSpec::toBodilessEntity);
     }
 
     /// Performs a DELETE request to the named endpoint, merging the supplied headers into
     /// the request after endpoint-level headers.
     ///
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
     public void delete(String endpointName, HttpHeaders headers) {
-        doExchange(endpointName, HttpMethod.DELETE, null, null, headers,
-                RestClient.ResponseSpec::toBodilessEntity);
+        doExchange(endpointName, HttpMethod.DELETE, null, null, headers, RestClient.ResponseSpec::toBodilessEntity);
     }
 
     /// Performs a DELETE request to the named endpoint, expanding URI template variables.
     ///
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
     public void delete(String endpointName, Map<String, ?> uriVariables) {
-        doExchange(endpointName, HttpMethod.DELETE, null, uriVariables, null,
-                RestClient.ResponseSpec::toBodilessEntity);
+        doExchange(
+                endpointName, HttpMethod.DELETE, null, uriVariables, null, RestClient.ResponseSpec::toBodilessEntity);
     }
 
     /// Performs a DELETE request to the named endpoint, expanding URI template variables and
     /// merging the supplied headers into the request after endpoint-level headers.
     ///
-    /// @param endpointName Name of the endpoint to invoke, as defined in the client configuration.
-    /// @param uriVariables Map of URI template variable names to values for expanding the endpoint path (e.g. `id` -> `pay-123` for an endpoint path like `/api/v1/payments/{id}`).
-    /// @param headers      Additional request headers to include on this call; these are merged after endpoint-level header defaults.
+    /// @param endpointName Name of the configured endpoint to invoke.
+    /// @param uriVariables Map of URI variables to expand the endpoint path.
+    /// @param headers      Call-specific headers, merged after endpoint defaults.
     public void delete(String endpointName, Map<String, ?> uriVariables, HttpHeaders headers) {
-        doExchange(endpointName, HttpMethod.DELETE, null, uriVariables, headers,
+        doExchange(
+                endpointName,
+                HttpMethod.DELETE,
+                null,
+                uriVariables,
+                headers,
                 RestClient.ResponseSpec::toBodilessEntity);
     }
 
@@ -700,42 +715,39 @@ public final class PlatformRestClient {
     /// passes the `ResponseSpec` to the `responseExtractor` function. The whole call is
     /// executed inside the client's `RetryTemplate`.
     ///
-    /// @param <T>               Type of the value returned by `responseExtractor`, typically the deserialized response body.
-    /// @param endpointName      Name of the endpoint to invoke.
-    /// @param methodOverride    Optional HTTP method to use instead of the one configured on the endpoint.
-    ///                          This allows the public HTTP-method-specific helpers (e.g. `get()`, `post()`) to delegate to this core
-    ///                          method while still respecting endpoint-level configuration when `methodOverride` is `null`.
-    /// @param body              Optional request body to attach. May be `null` for methods that don't support bodies (e.g. GET, DELETE).
-    /// @param uriVariables      Optional URI template variables to expand in the endpoint path. May be `null` if the endpoint path contains
-    ///                          no variables.
-    /// @param additionalHeaders Optional caller-supplied headers to merge into the request after endpoint-level header defaults.
-    ///                          May be `null` when no extra headers are needed.
-    /// @param responseExtractor Function that takes the `ResponseSpec` after the request is sent and extracts the desired return value
-    ///                           (e.g. by calling `body(Class<T>)` or `body(ParameterizedTypeReference<T>)`).
+    /// @param <T>               Type of the extracted response value.
+    /// @param endpointName      Name of the configured endpoint to invoke.
+    /// @param methodOverride    Optional HTTP method overriding the endpoint default.
+    /// @param body              Optional request body to attach (null if unsupported).
+    /// @param uriVariables      Optional URI variables to expand the endpoint path.
+    /// @param additionalHeaders Optional extra headers merging after endpoint defaults.
+    /// @param responseExtractor Function extracting the desired return value from ResponseSpec.
     /// @return The value returned by `responseExtractor`, typically the deserialized response body.
-    private <T> T doExchange(String endpointName, HttpMethod methodOverride, Object body,
-                             Map<String, ?> uriVariables, HttpHeaders additionalHeaders,
-                             Function<RestClient.ResponseSpec, T> responseExtractor) {
+    private <T> T doExchange(
+            String endpointName,
+            HttpMethod methodOverride,
+            Object body,
+            Map<String, ?> uriVariables,
+            HttpHeaders additionalHeaders,
+            Function<RestClient.ResponseSpec, T> responseExtractor) {
         var endpoint = registry.getEndpoint(clientName, endpointName);
         var restClient = registry.getClient(clientName);
         var httpMethod = methodOverride != null ? methodOverride : HttpMethod.valueOf(endpoint.method());
         var effectiveLogging = registry.getEffectiveLogging(clientName, endpointName);
 
         return registry.executeWithRetry(clientName, ctx -> {
-            var requestSpec = restClient.method(httpMethod)
-                    .uri(buildUri(endpoint, uriVariables));
+            var requestSpec = restClient.method(httpMethod).uri(buildUri(endpoint, uriVariables));
 
             applyEndpointHeaders(requestSpec, endpoint);
             applyAdditionalHeaders(requestSpec, additionalHeaders);
 
             if (effectiveLogging != null && Boolean.TRUE.equals(effectiveLogging.enabled())) {
-                requestSpec.attribute(RestClientLoggingInterceptor.ATTRIBUTE_KEY,
+                requestSpec.attribute(
+                        RestClientLoggingInterceptor.ATTRIBUTE_KEY,
                         new LoggingContext(clientName, endpointName, effectiveLogging));
             }
 
-            var responseSpec = body != null
-                    ? requestSpec.body(body).retrieve()
-                    : requestSpec.retrieve();
+            var responseSpec = body != null ? requestSpec.body(body).retrieve() : requestSpec.retrieve();
 
             return responseExtractor.apply(responseSpec);
         });
@@ -743,11 +755,11 @@ public final class PlatformRestClient {
 
     /// Builds a URI builder function that combines the endpoint path, endpoint-level
     /// default query parameters, and any caller-supplied URI template variables.
-    private static Function<UriBuilder, URI> buildUri(EndpointProperties endpoint,
-                                                      Map<String, ?> uriVariables) {
+    private static Function<UriBuilder, URI> buildUri(EndpointProperties endpoint, Map<String, ?> uriVariables) {
         return builder -> {
             var b = builder.path(endpoint.path());
-            if (endpoint.defaultQueryParams() != null && !endpoint.defaultQueryParams().isEmpty()) {
+            if (endpoint.defaultQueryParams() != null
+                    && !endpoint.defaultQueryParams().isEmpty()) {
                 endpoint.defaultQueryParams().forEach(b::queryParam);
             }
             if (uriVariables != null && !uriVariables.isEmpty()) {
@@ -760,8 +772,7 @@ public final class PlatformRestClient {
     /// Applies endpoint-level `Content-Type` and `Accept` header overrides to the request.
     ///
     /// When set on the endpoint, these take precedence over any client-level defaults.
-    private static void applyEndpointHeaders(RestClient.RequestBodySpec requestSpec,
-                                             EndpointProperties endpoint) {
+    private static void applyEndpointHeaders(RestClient.RequestBodySpec requestSpec, EndpointProperties endpoint) {
         if (endpoint.contentType() != null) {
             requestSpec.header(HttpHeaders.CONTENT_TYPE, endpoint.contentType());
         }
@@ -774,10 +785,9 @@ public final class PlatformRestClient {
     ///
     /// This is a no-op when `headers` is `null` or empty.
     ///
-    /// @param requestSpec the request spec to apply headers to
-    /// @param headers     the caller-supplied headers to merge; may be `null`
-    private static void applyAdditionalHeaders(RestClient.RequestBodySpec requestSpec,
-                                               HttpHeaders headers) {
+    /// @param requestSpec The request spec to apply headers to.
+    /// @param headers     Caller-supplied headers to merge; may be null.
+    private static void applyAdditionalHeaders(RestClient.RequestBodySpec requestSpec, HttpHeaders headers) {
         if (headers == null || headers.isEmpty()) {
             return;
         }

@@ -1,25 +1,5 @@
 package com.kevshah.platform.starter.rest.client;
 
-import com.kevshah.platform.starter.rest.client.config.ClientProperties;
-import com.kevshah.platform.starter.rest.client.config.EndpointProperties;
-import com.kevshah.platform.starter.rest.client.config.LoggingProperties;
-import com.kevshah.platform.starter.rest.client.config.RestClientProperties;
-import com.kevshah.platform.starter.rest.client.config.RetryProperties;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
 import static com.kevshah.platform.starter.rest.client.TestFixtures.ConfigUpdateRequest;
 import static com.kevshah.platform.starter.rest.client.TestFixtures.CreateItemRequest;
 import static com.kevshah.platform.starter.rest.client.TestFixtures.ItemResponse;
@@ -28,6 +8,25 @@ import static com.kevshah.platform.starter.rest.client.TestFixtures.ToggleReques
 import static com.kevshah.platform.starter.rest.client.TestFixtures.UpdateItemRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.kevshah.platform.starter.rest.client.config.ClientProperties;
+import com.kevshah.platform.starter.rest.client.config.EndpointProperties;
+import com.kevshah.platform.starter.rest.client.config.LoggingProperties;
+import com.kevshah.platform.starter.rest.client.config.RestClientProperties;
+import com.kevshah.platform.starter.rest.client.config.RetryProperties;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 
 class PlatformRestClientTest {
 
@@ -48,13 +47,11 @@ class PlatformRestClientTest {
         return mockWebServer.url("/").toString();
     }
 
-    private PlatformRestClientRegistry registryWithEndpoint(String clientName,
-                                                            String endpointName,
-                                                            EndpointProperties endpoint) {
-        var clientProps = new ClientProperties(baseUrl(), null, null, null, null, null,
-                Map.of(endpointName, endpoint), null, null, null);
-        return new PlatformRestClientRegistry(
-                new RestClientProperties(Map.of(clientName, clientProps)), null);
+    private PlatformRestClientRegistry registryWithEndpoint(
+            String clientName, String endpointName, EndpointProperties endpoint) {
+        var clientProps = new ClientProperties(
+                baseUrl(), null, null, null, null, null, Map.of(endpointName, endpoint), null, null, null);
+        return new PlatformRestClientRegistry(new RestClientProperties(Map.of(clientName, clientProps)), null);
     }
 
     // -------------------------------------------------------------------------
@@ -69,8 +66,9 @@ class PlatformRestClientTest {
             // Given
             var registry = new PlatformRestClientRegistry(
                     new RestClientProperties(Map.of(
-                            "svc", new ClientProperties(baseUrl(), null, null, null, null, null, null, null, null, null)
-                    )), null);
+                            "svc",
+                            new ClientProperties(baseUrl(), null, null, null, null, null, null, null, null, null))),
+                    null);
 
             // When
             var client = registry.getPlatformRestClient("svc");
@@ -106,8 +104,8 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "create",
-                    new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "create", new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc")
@@ -128,8 +126,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "list",
-                    new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "list", new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc").exchange("list", ItemResponse.class);
@@ -147,13 +145,12 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"1\"},{\"id\":\"2\"}]"));
-            var registry = registryWithEndpoint("svc", "list",
-                    new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "list", new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").exchange("list",
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .exchange("list", new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             assertThat(result).hasSize(2);
@@ -167,8 +164,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "update",
-                    new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "update", new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc")
@@ -189,14 +186,19 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "update",
-                    new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "update", new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-1");
 
             // When
             var result = registry.getPlatformRestClient("svc")
-                    .exchange("update", new UpdateItemRequest("ACTIVE"), Map.of("id", "pay-1"), headers, ItemResponse.class);
+                    .exchange(
+                            "update",
+                            new UpdateItemRequest("ACTIVE"),
+                            Map.of("id", "pay-1"),
+                            headers,
+                            ItemResponse.class);
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -212,8 +214,8 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "create",
-                    new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "create", new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Request-Id", "req-42");
 
@@ -234,8 +236,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "list",
-                    new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "list", new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Tenant-Id", "tenant-7");
 
@@ -255,14 +257,18 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"1\"}]"));
-            var registry = registryWithEndpoint("svc", "list-under",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "list-under",
                     new EndpointProperties("GET", "/api/v1/owners/{ownerId}/items", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").exchange("list-under",
-                    null, Map.of("ownerId", "owner-5"),
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .exchange(
+                            "list-under",
+                            null,
+                            Map.of("ownerId", "owner-5"),
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -278,16 +284,21 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"1\"}]"));
-            var registry = registryWithEndpoint("svc", "list-under",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "list-under",
                     new EndpointProperties("GET", "/api/v1/owners/{ownerId}/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-99");
 
             // When
-            var result = registry.getPlatformRestClient("svc").exchange("list-under",
-                    null, Map.of("ownerId", "owner-5"), headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .exchange(
+                            "list-under",
+                            null,
+                            Map.of("ownerId", "owner-5"),
+                            headers,
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -303,14 +314,15 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"new-1\"}]"));
-            var registry = registryWithEndpoint("svc", "create",
-                    new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "create", new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").exchange("create",
-                    new CreateItemRequest("widget"),
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .exchange(
+                            "create",
+                            new CreateItemRequest("widget"),
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             assertThat(result).hasSize(1);
@@ -324,16 +336,18 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"new-1\"}]"));
-            var registry = registryWithEndpoint("svc", "create",
-                    new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "create", new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Idempotency-Key", "idem-1");
 
             // When
-            var result = registry.getPlatformRestClient("svc").exchange("create",
-                    new CreateItemRequest("widget"), headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .exchange(
+                            "create",
+                            new CreateItemRequest("widget"),
+                            headers,
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -349,15 +363,14 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"1\"},{\"id\":\"2\"}]"));
-            var registry = registryWithEndpoint("svc", "list",
-                    new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "list", new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Tenant-Id", "tenant-3");
 
             // When
-            var result = registry.getPlatformRestClient("svc").exchange("list", headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .exchange("list", headers, new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -381,8 +394,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "find",
-                    new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "find", new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc").get("find", ItemResponse.class);
@@ -401,12 +414,12 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-42\"}"));
-            var registry = registryWithEndpoint("svc", "find-by-id",
-                    new EndpointProperties("GET", "/api/v1/items/{id}", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "find-by-id", new EndpointProperties("GET", "/api/v1/items/{id}", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc")
-                    .get("find-by-id", Map.of("id", "pay-42"), ItemResponse.class);
+            var result =
+                    registry.getPlatformRestClient("svc").get("find-by-id", Map.of("id", "pay-42"), ItemResponse.class);
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -421,13 +434,12 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"1\"},{\"id\":\"2\"},{\"id\":\"3\"}]"));
-            var registry = registryWithEndpoint("svc", "list",
-                    new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "list", new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").get("list",
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .get("list", new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             assertThat(result).hasSize(3);
@@ -441,14 +453,17 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"item-A\"},{\"id\":\"item-B\"}]"));
-            var registry = registryWithEndpoint("svc", "list-by-owner",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "list-by-owner",
                     new EndpointProperties("GET", "/api/v1/owners/{ownerId}/items", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").get("list-by-owner",
-                    Map.of("ownerId", "owner-1"),
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .get(
+                            "list-by-owner",
+                            Map.of("ownerId", "owner-1"),
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -464,8 +479,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "find",
-                    new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "find", new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Tenant-Id", "tenant-5");
 
@@ -486,8 +501,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-10\"}"));
-            var registry = registryWithEndpoint("svc", "find-by-id",
-                    new EndpointProperties("GET", "/api/v1/items/{id}", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "find-by-id", new EndpointProperties("GET", "/api/v1/items/{id}", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-5");
 
@@ -509,15 +524,14 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"1\"},{\"id\":\"2\"}]"));
-            var registry = registryWithEndpoint("svc", "list",
-                    new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "list", new EndpointProperties("GET", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Tenant-Id", "tenant-9");
 
             // When
-            var result = registry.getPlatformRestClient("svc").get("list", headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .get("list", headers, new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -533,16 +547,20 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"item-X\"},{\"id\":\"item-Y\"}]"));
-            var registry = registryWithEndpoint("svc", "list-by-owner",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "list-by-owner",
                     new EndpointProperties("GET", "/api/v1/owners/{ownerId}/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-get-ptr");
 
             // When
-            var result = registry.getPlatformRestClient("svc").get("list-by-owner",
-                    Map.of("ownerId", "owner-7"), headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .get(
+                            "list-by-owner",
+                            Map.of("ownerId", "owner-7"),
+                            headers,
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -567,8 +585,8 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"created-1\"}"));
-            var registry = registryWithEndpoint("svc", "create",
-                    new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "create", new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc")
@@ -589,12 +607,18 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"child-1\"}"));
-            var registry = registryWithEndpoint("svc", "create-child",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "create-child",
                     new EndpointProperties("POST", "/api/v1/parents/{parentId}/children", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc")
-                    .post("create-child", new CreateItemRequest("child"), Map.of("parentId", "parent-42"), ItemResponse.class);
+                    .post(
+                            "create-child",
+                            new CreateItemRequest("child"),
+                            Map.of("parentId", "parent-42"),
+                            ItemResponse.class);
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -610,8 +634,8 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"created-2\"}"));
-            var registry = registryWithEndpoint("svc", "create",
-                    new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "create", new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Idempotency-Key", "idem-42");
 
@@ -633,14 +657,21 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"child-2\"}"));
-            var registry = registryWithEndpoint("svc", "create-child",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "create-child",
                     new EndpointProperties("POST", "/api/v1/parents/{parentId}/children", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Request-Id", "req-7");
 
             // When
             var result = registry.getPlatformRestClient("svc")
-                    .post("create-child", new CreateItemRequest("child"), Map.of("parentId", "parent-7"), headers, ItemResponse.class);
+                    .post(
+                            "create-child",
+                            new CreateItemRequest("child"),
+                            Map.of("parentId", "parent-7"),
+                            headers,
+                            ItemResponse.class);
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -656,14 +687,15 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"new-1\"},{\"id\":\"new-2\"}]"));
-            var registry = registryWithEndpoint("svc", "bulk-create",
-                    new EndpointProperties("POST", "/api/v1/items/bulk", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "bulk-create", new EndpointProperties("POST", "/api/v1/items/bulk", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").post("bulk-create",
-                    List.of(new CreateItemRequest("a"), new CreateItemRequest("b")),
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .post(
+                            "bulk-create",
+                            List.of(new CreateItemRequest("a"), new CreateItemRequest("b")),
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -679,16 +711,18 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"new-1\"}]"));
-            var registry = registryWithEndpoint("svc", "create",
-                    new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "create", new EndpointProperties("POST", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Idempotency-Key", "idem-77");
 
             // When
-            var result = registry.getPlatformRestClient("svc").post("create",
-                    new CreateItemRequest("widget"), headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .post(
+                            "create",
+                            new CreateItemRequest("widget"),
+                            headers,
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -704,14 +738,18 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"child-3\"}]"));
-            var registry = registryWithEndpoint("svc", "create-children",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "create-children",
                     new EndpointProperties("POST", "/api/v1/parents/{parentId}/children", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").post("create-children",
-                    List.of(new CreateItemRequest("c")), Map.of("parentId", "parent-3"),
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .post(
+                            "create-children",
+                            List.of(new CreateItemRequest("c")),
+                            Map.of("parentId", "parent-3"),
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -727,16 +765,21 @@ class PlatformRestClientTest {
                     .setResponseCode(201)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"child-4\"}]"));
-            var registry = registryWithEndpoint("svc", "create-children",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "create-children",
                     new EndpointProperties("POST", "/api/v1/parents/{parentId}/children", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-4");
 
             // When
-            var result = registry.getPlatformRestClient("svc").post("create-children",
-                    List.of(new CreateItemRequest("c")), Map.of("parentId", "parent-4"), headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .post(
+                            "create-children",
+                            List.of(new CreateItemRequest("c")),
+                            Map.of("parentId", "parent-4"),
+                            headers,
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -761,8 +804,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "update",
-                    new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "update", new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc")
@@ -783,8 +826,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"status\":\"REPLACED\"}"));
-            var registry = registryWithEndpoint("svc", "replace",
-                    new EndpointProperties("PUT", "/api/v1/config", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "replace", new EndpointProperties("PUT", "/api/v1/config", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc")
@@ -805,8 +848,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"status\":\"OK\"}"));
-            var registry = registryWithEndpoint("svc", "replace",
-                    new EndpointProperties("PUT", "/api/v1/config", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "replace", new EndpointProperties("PUT", "/api/v1/config", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-put-1");
 
@@ -828,8 +871,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-2\"}"));
-            var registry = registryWithEndpoint("svc", "update",
-                    new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "update", new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Request-Id", "req-put-2");
 
@@ -851,14 +894,15 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"status\":\"REPLACED\"}]"));
-            var registry = registryWithEndpoint("svc", "replace",
-                    new EndpointProperties("PUT", "/api/v1/config", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "replace", new EndpointProperties("PUT", "/api/v1/config", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").put("replace",
-                    new ConfigUpdateRequest("val"),
-                    new ParameterizedTypeReference<List<StatusResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .put(
+                            "replace",
+                            new ConfigUpdateRequest("val"),
+                            new ParameterizedTypeReference<List<StatusResponse>>() {});
 
             // Then
             assertThat(result).hasSize(1);
@@ -872,16 +916,18 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"status\":\"OK\"}]"));
-            var registry = registryWithEndpoint("svc", "replace",
-                    new EndpointProperties("PUT", "/api/v1/config", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "replace", new EndpointProperties("PUT", "/api/v1/config", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-put-ptr");
 
             // When
-            var result = registry.getPlatformRestClient("svc").put("replace",
-                    new ConfigUpdateRequest("val"), headers,
-                    new ParameterizedTypeReference<List<StatusResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .put(
+                            "replace",
+                            new ConfigUpdateRequest("val"),
+                            headers,
+                            new ParameterizedTypeReference<List<StatusResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -897,14 +943,16 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"pay-3\"}]"));
-            var registry = registryWithEndpoint("svc", "update",
-                    new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "update", new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").put("update",
-                    new UpdateItemRequest("ACTIVE"), Map.of("id", "pay-3"),
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .put(
+                            "update",
+                            new UpdateItemRequest("ACTIVE"),
+                            Map.of("id", "pay-3"),
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -920,16 +968,19 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"pay-4\"}]"));
-            var registry = registryWithEndpoint("svc", "update",
-                    new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "update", new EndpointProperties("PUT", "/api/v1/items/{id}", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-put-all");
 
             // When
-            var result = registry.getPlatformRestClient("svc").put("update",
-                    new UpdateItemRequest("ACTIVE"), Map.of("id", "pay-4"), headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .put(
+                            "update",
+                            new UpdateItemRequest("ACTIVE"),
+                            Map.of("id", "pay-4"),
+                            headers,
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -954,12 +1005,18 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "partial-update",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "partial-update",
                     new EndpointProperties("PATCH", "/api/v1/items/{id}", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc")
-                    .patch("partial-update", new UpdateItemRequest("INACTIVE"), Map.of("id", "pay-1"), ItemResponse.class);
+                    .patch(
+                            "partial-update",
+                            new UpdateItemRequest("INACTIVE"),
+                            Map.of("id", "pay-1"),
+                            ItemResponse.class);
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -976,8 +1033,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"status\":\"PATCHED\"}"));
-            var registry = registryWithEndpoint("svc", "toggle",
-                    new EndpointProperties("PATCH", "/api/v1/config", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "toggle", new EndpointProperties("PATCH", "/api/v1/config", null, null, null, null));
 
             // When
             var result = registry.getPlatformRestClient("svc")
@@ -998,8 +1055,8 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"status\":\"OK\"}"));
-            var registry = registryWithEndpoint("svc", "toggle",
-                    new EndpointProperties("PATCH", "/api/v1/config", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "toggle", new EndpointProperties("PATCH", "/api/v1/config", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-patch-1");
 
@@ -1021,14 +1078,21 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-5\"}"));
-            var registry = registryWithEndpoint("svc", "partial-update",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "partial-update",
                     new EndpointProperties("PATCH", "/api/v1/items/{id}", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Request-Id", "req-patch-5");
 
             // When
             var result = registry.getPlatformRestClient("svc")
-                    .patch("partial-update", new UpdateItemRequest("INACTIVE"), Map.of("id", "pay-5"), headers, ItemResponse.class);
+                    .patch(
+                            "partial-update",
+                            new UpdateItemRequest("INACTIVE"),
+                            Map.of("id", "pay-5"),
+                            headers,
+                            ItemResponse.class);
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -1044,14 +1108,15 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"status\":\"PATCHED\"}]"));
-            var registry = registryWithEndpoint("svc", "toggle",
-                    new EndpointProperties("PATCH", "/api/v1/config", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "toggle", new EndpointProperties("PATCH", "/api/v1/config", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").patch("toggle",
-                    new ToggleRequest(false),
-                    new ParameterizedTypeReference<List<StatusResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .patch(
+                            "toggle",
+                            new ToggleRequest(false),
+                            new ParameterizedTypeReference<List<StatusResponse>>() {});
 
             // Then
             assertThat(result).hasSize(1);
@@ -1065,16 +1130,18 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"status\":\"OK\"}]"));
-            var registry = registryWithEndpoint("svc", "toggle",
-                    new EndpointProperties("PATCH", "/api/v1/config", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "toggle", new EndpointProperties("PATCH", "/api/v1/config", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-patch-ptr");
 
             // When
-            var result = registry.getPlatformRestClient("svc").patch("toggle",
-                    new ToggleRequest(false), headers,
-                    new ParameterizedTypeReference<List<StatusResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .patch(
+                            "toggle",
+                            new ToggleRequest(false),
+                            headers,
+                            new ParameterizedTypeReference<List<StatusResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -1090,14 +1157,18 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"pay-6\"}]"));
-            var registry = registryWithEndpoint("svc", "partial-update",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "partial-update",
                     new EndpointProperties("PATCH", "/api/v1/items/{id}", null, null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").patch("partial-update",
-                    new UpdateItemRequest("INACTIVE"), Map.of("id", "pay-6"),
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .patch(
+                            "partial-update",
+                            new UpdateItemRequest("INACTIVE"),
+                            Map.of("id", "pay-6"),
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -1113,16 +1184,21 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[{\"id\":\"pay-7\"}]"));
-            var registry = registryWithEndpoint("svc", "partial-update",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "partial-update",
                     new EndpointProperties("PATCH", "/api/v1/items/{id}", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-patch-all");
 
             // When
-            var result = registry.getPlatformRestClient("svc").patch("partial-update",
-                    new UpdateItemRequest("INACTIVE"), Map.of("id", "pay-7"), headers,
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .patch(
+                            "partial-update",
+                            new UpdateItemRequest("INACTIVE"),
+                            Map.of("id", "pay-7"),
+                            headers,
+                            new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
@@ -1144,8 +1220,8 @@ class PlatformRestClientTest {
         void delete_withoutUriVariables_sendsDeleteRequest() throws Exception {
             // Given
             mockWebServer.enqueue(new MockResponse().setResponseCode(204));
-            var registry = registryWithEndpoint("svc", "delete-all",
-                    new EndpointProperties("DELETE", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "delete-all", new EndpointProperties("DELETE", "/api/v1/items", null, null, null, null));
 
             // When
             registry.getPlatformRestClient("svc").delete("delete-all");
@@ -1160,7 +1236,9 @@ class PlatformRestClientTest {
         void delete_withUriVariables_expandsPathAndSendsDeleteRequest() throws Exception {
             // Given
             mockWebServer.enqueue(new MockResponse().setResponseCode(204));
-            var registry = registryWithEndpoint("svc", "delete-by-id",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "delete-by-id",
                     new EndpointProperties("DELETE", "/api/v1/items/{id}", null, null, null, null));
 
             // When
@@ -1176,8 +1254,8 @@ class PlatformRestClientTest {
         void delete_withHeaders_forwardsAdditionalHeaders() throws Exception {
             // Given
             mockWebServer.enqueue(new MockResponse().setResponseCode(204));
-            var registry = registryWithEndpoint("svc", "delete-all",
-                    new EndpointProperties("DELETE", "/api/v1/items", null, null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc", "delete-all", new EndpointProperties("DELETE", "/api/v1/items", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-del-1");
 
@@ -1194,7 +1272,9 @@ class PlatformRestClientTest {
         void delete_withUriVariablesAndHeaders_expandsPathAndForwardsHeaders() throws Exception {
             // Given
             mockWebServer.enqueue(new MockResponse().setResponseCode(204));
-            var registry = registryWithEndpoint("svc", "delete-by-id",
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "delete-by-id",
                     new EndpointProperties("DELETE", "/api/v1/items/{id}", null, null, null, null));
             var headers = new HttpHeaders();
             headers.set("X-Correlation-Id", "corr-del-2");
@@ -1223,9 +1303,16 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/vnd.api+json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var registry = registryWithEndpoint("svc", "find",
-                    new EndpointProperties("GET", "/api/v1/items", null,
-                            "application/vnd.api+json", "application/vnd.api+json", null));
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "find",
+                    new EndpointProperties(
+                            "GET",
+                            "/api/v1/items",
+                            null,
+                            "application/vnd.api+json",
+                            "application/vnd.api+json",
+                            null));
 
             // When
             var result = registry.getPlatformRestClient("svc").get("find", ItemResponse.class);
@@ -1244,12 +1331,18 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"pay-1\"}"));
-            var clientProps = new ClientProperties(baseUrl(), "application/json", "application/json",
-                    null, null, null,
+            var clientProps = new ClientProperties(
+                    baseUrl(),
+                    "application/json",
+                    "application/json",
+                    null,
+                    null,
+                    null,
                     Map.of("find", new EndpointProperties("GET", "/api/v1/items", null, null, null, null)),
-                    null, null, null);
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(Map.of("svc", clientProps)), null);
+                    null,
+                    null,
+                    null);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(Map.of("svc", clientProps)), null);
 
             // When
             var result = registry.getPlatformRestClient("svc").get("find", ItemResponse.class);
@@ -1276,20 +1369,19 @@ class PlatformRestClientTest {
                     .setResponseCode(200)
                     .setHeader("Content-Type", "application/json")
                     .setBody("[]"));
-            var registry = registryWithEndpoint("svc", "list",
-                    new EndpointProperties("GET", "/api/v1/items",
-                            Map.of("page", "0", "size", "10"), null, null, null));
+            var registry = registryWithEndpoint(
+                    "svc",
+                    "list",
+                    new EndpointProperties(
+                            "GET", "/api/v1/items", Map.of("page", "0", "size", "10"), null, null, null));
 
             // When
-            var result = registry.getPlatformRestClient("svc").get("list",
-                    new ParameterizedTypeReference<List<ItemResponse>>() {
-                    });
+            var result = registry.getPlatformRestClient("svc")
+                    .get("list", new ParameterizedTypeReference<List<ItemResponse>>() {});
 
             // Then
             var recorded = mockWebServer.takeRequest();
-            assertThat(recorded.getPath())
-                    .contains("page=0")
-                    .contains("size=10");
+            assertThat(recorded.getPath()).contains("page=0").contains("size=10");
             assertThat(result).isEmpty();
         }
     }
@@ -1311,11 +1403,18 @@ class PlatformRestClientTest {
                     .setBody("{\"id\":\"pay-1\"}"));
 
             var retryProps = new RetryProperties(2, Duration.ofMillis(10), null, null, List.of(503));
-            var clientProps = new ClientProperties(baseUrl(), null, null, null, null, null,
+            var clientProps = new ClientProperties(
+                    baseUrl(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
                     Map.of("find", new EndpointProperties("GET", "/api/v1/items", null, null, null, null)),
-                    retryProps, null, null);
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(Map.of("svc", clientProps)), null);
+                    retryProps,
+                    null,
+                    null);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(Map.of("svc", clientProps)), null);
 
             // When
             var result = registry.getPlatformRestClient("svc").get("find", ItemResponse.class);
@@ -1343,14 +1442,22 @@ class PlatformRestClientTest {
 
             var logging = new LoggingProperties(true, "DEBUG", null, null);
             var endpoint = new EndpointProperties("GET", "/api/v1/items/{id}", null, null, null, null);
-            var clientProps = new ClientProperties(baseUrl(), "application/json", "application/json",
-                    null, null, null, Map.of("get-item", endpoint), null, null, logging);
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(Map.of("svc", clientProps)), null);
+            var clientProps = new ClientProperties(
+                    baseUrl(),
+                    "application/json",
+                    "application/json",
+                    null,
+                    null,
+                    null,
+                    Map.of("get-item", endpoint),
+                    null,
+                    null,
+                    logging);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(Map.of("svc", clientProps)), null);
 
             // When
-            var result = registry.getPlatformRestClient("svc")
-                    .get("get-item", Map.of("id", "item-1"), ItemResponse.class);
+            var result =
+                    registry.getPlatformRestClient("svc").get("get-item", Map.of("id", "item-1"), ItemResponse.class);
 
             // Then
             assertThat(result).isNotNull();
@@ -1365,20 +1472,28 @@ class PlatformRestClientTest {
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"item-2\"}"));
 
-            var logging = new LoggingProperties(true, "DEBUG",
-                    new LoggingProperties.RequestConfig(
-                            new LoggingProperties.PayloadConfig(true),
-                            null
-                    ), null);
+            var logging = new LoggingProperties(
+                    true,
+                    "DEBUG",
+                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(true), null),
+                    null);
             var endpoint = new EndpointProperties("GET", "/api/v1/items/{id}", null, null, null, null);
-            var clientProps = new ClientProperties(baseUrl(), "application/json", "application/json",
-                    null, null, null, Map.of("get-item", endpoint), null, null, logging);
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(Map.of("svc", clientProps)), null);
+            var clientProps = new ClientProperties(
+                    baseUrl(),
+                    "application/json",
+                    "application/json",
+                    null,
+                    null,
+                    null,
+                    Map.of("get-item", endpoint),
+                    null,
+                    null,
+                    logging);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(Map.of("svc", clientProps)), null);
 
             // When
-            var result = registry.getPlatformRestClient("svc")
-                    .get("get-item", Map.of("id", "item-2"), ItemResponse.class);
+            var result =
+                    registry.getPlatformRestClient("svc").get("get-item", Map.of("id", "item-2"), ItemResponse.class);
 
             // Then — response body must be fully readable by the deserialiser after buffering for logging
             assertThat(result).isNotNull();
@@ -1393,16 +1508,24 @@ class PlatformRestClientTest {
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"item-3\"}"));
 
-            var logging = new LoggingProperties(true, "DEBUG",
-                    new LoggingProperties.RequestConfig(
-                            new LoggingProperties.PayloadConfig(true),
-                            null
-                    ), null);
+            var logging = new LoggingProperties(
+                    true,
+                    "DEBUG",
+                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(true), null),
+                    null);
             var endpoint = new EndpointProperties("POST", "/api/v1/items", null, null, null, null);
-            var clientProps = new ClientProperties(baseUrl(), "application/json", "application/json",
-                    null, null, null, Map.of("create-item", endpoint), null, null, logging);
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(Map.of("svc", clientProps)), null);
+            var clientProps = new ClientProperties(
+                    baseUrl(),
+                    "application/json",
+                    "application/json",
+                    null,
+                    null,
+                    null,
+                    Map.of("create-item", endpoint),
+                    null,
+                    null,
+                    logging);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(Map.of("svc", clientProps)), null);
 
             // When
             var result = registry.getPlatformRestClient("svc")
@@ -1426,14 +1549,22 @@ class PlatformRestClientTest {
             var clientLogging = new LoggingProperties(true, "DEBUG", null, null);
             var endpointLogging = new LoggingProperties(false, "DEBUG", null, null);
             var endpoint = new EndpointProperties("GET", "/api/v1/items/{id}", null, null, null, endpointLogging);
-            var clientProps = new ClientProperties(baseUrl(), "application/json", "application/json",
-                    null, null, null, Map.of("get-item", endpoint), null, null, clientLogging);
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(Map.of("svc", clientProps)), null);
+            var clientProps = new ClientProperties(
+                    baseUrl(),
+                    "application/json",
+                    "application/json",
+                    null,
+                    null,
+                    null,
+                    Map.of("get-item", endpoint),
+                    null,
+                    null,
+                    clientLogging);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(Map.of("svc", clientProps)), null);
 
             // When
-            var result = registry.getPlatformRestClient("svc")
-                    .get("get-item", Map.of("id", "item-4"), ItemResponse.class);
+            var result =
+                    registry.getPlatformRestClient("svc").get("get-item", Map.of("id", "item-4"), ItemResponse.class);
 
             // Then
             assertThat(result).isNotNull();
@@ -1448,21 +1579,29 @@ class PlatformRestClientTest {
                     .setHeader("Content-Type", "application/json")
                     .setBody("{\"id\":\"item-5\"}"));
 
-            var logging = new LoggingProperties(true, "TRACE", null,
+            var logging = new LoggingProperties(
+                    true,
+                    "TRACE",
+                    null,
                     new LoggingProperties.ResponseConfig(
-                            null,
-                            new LoggingProperties.HeadersConfig(true, null, List.of("X-Response-Id"))
-                    )
-            );
+                            null, new LoggingProperties.HeadersConfig(true, null, List.of("X-Response-Id"))));
             var endpoint = new EndpointProperties("GET", "/api/v1/items/{id}", null, null, null, null);
-            var clientProps = new ClientProperties(baseUrl(), "application/json", "application/json",
-                    null, null, null, Map.of("get-item", endpoint), null, null, logging);
-            var registry = new PlatformRestClientRegistry(
-                    new RestClientProperties(Map.of("svc", clientProps)), null);
+            var clientProps = new ClientProperties(
+                    baseUrl(),
+                    "application/json",
+                    "application/json",
+                    null,
+                    null,
+                    null,
+                    Map.of("get-item", endpoint),
+                    null,
+                    null,
+                    logging);
+            var registry = new PlatformRestClientRegistry(new RestClientProperties(Map.of("svc", clientProps)), null);
 
             // When
-            var result = registry.getPlatformRestClient("svc")
-                    .get("get-item", Map.of("id", "item-5"), ItemResponse.class);
+            var result =
+                    registry.getPlatformRestClient("svc").get("get-item", Map.of("id", "item-5"), ItemResponse.class);
 
             // Then
             assertThat(result).isNotNull();
@@ -1482,9 +1621,9 @@ class PlatformRestClientTest {
             // Given
             var registry = new PlatformRestClientRegistry(
                     new RestClientProperties(Map.of(
-                            "svc", new ClientProperties(baseUrl(), null, null, null, null, null,
-                                    Map.of(), null, null, null)
-                    )), null);
+                            "svc",
+                            new ClientProperties(baseUrl(), null, null, null, null, null, Map.of(), null, null, null))),
+                    null);
 
             // When/Then
             assertThatThrownBy(() -> registry.getPlatformRestClient("svc").get("nonexistent", ItemResponse.class))
@@ -1493,4 +1632,3 @@ class PlatformRestClientTest {
         }
     }
 }
-

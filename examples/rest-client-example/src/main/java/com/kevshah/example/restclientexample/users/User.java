@@ -11,7 +11,4 @@ package com.kevshah.example.restclientexample.users;
 /// @param email    email address
 /// @param phone    contact phone number
 /// @param website  personal website URL
-public record User(Integer id, String name, String username, String email,
-                   String phone, String website) {
-}
-
+public record User(Integer id, String name, String username, String email, String phone, String website) {}

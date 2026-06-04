@@ -30,4 +30,3 @@ public final class PlatformHttpStatusRetryException extends RuntimeException {
         return requestUri;
     }
 }
-

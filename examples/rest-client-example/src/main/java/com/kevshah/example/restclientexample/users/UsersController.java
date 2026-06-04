@@ -1,5 +1,6 @@
 package com.kevshah.example.restclientexample.users;
 
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,13 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 /// REST controller that exposes the Users API, delegating to [UserService] which
 /// uses the `users-client` REST client configured via the platform rest-client starter.
 ///
 /// **Note:** This controller is not strictly necessary to demonstrate the REST client, but it provides a convenient way
-///  to verify that the client is working as expected by exposing the same operations via HTTP endpoints that can be easily
+///  to verify that the client is working as expected by exposing the same operations via HTTP endpoints that can be
+/// easily
 ///  tested with tools like `curl` or Postman.
 @RestController
 @RequestMapping("/api/v1/users")
@@ -47,7 +47,6 @@ public class UsersController {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
-
     /// Creates a new user with the given details.
     ///
     /// @param user the user details for the new user
@@ -58,7 +57,6 @@ public class UsersController {
         return ResponseEntity.status(201).body(createdUser);
     }
 
-
     /// Delete a user by their identifier.
     ///
     /// @param id the user identifier
@@ -68,6 +66,4 @@ public class UsersController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
-
 }
-

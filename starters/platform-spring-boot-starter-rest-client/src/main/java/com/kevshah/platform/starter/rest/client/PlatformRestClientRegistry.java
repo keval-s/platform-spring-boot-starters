@@ -7,9 +7,17 @@ import com.kevshah.platform.starter.rest.client.config.RestClientProperties;
 import com.kevshah.platform.starter.rest.client.config.RetryProperties;
 import com.kevshah.platform.starter.rest.client.exception.PlatformHttpStatusRetryException;
 import com.kevshah.platform.starter.rest.client.logging.RestClientLoggingInterceptor;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import org.springframework.boot.ssl.SslBundles;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -20,15 +28,6 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
 
 /// Central registry that holds all pre-configured `RestClient` instances and their
 /// corresponding `RetryTemplate`s.
@@ -127,8 +126,7 @@ public final class PlatformRestClientRegistry {
     /// `RetryTemplate` to re-execute the callback.
     ///
     /// Throws `NoSuchElementException` when the named client is not configured.
-    <T, E extends Exception> T executeWithRetry(String clientName,
-                                                RetryCallback<T, E> callback) throws E {
+    <T, E extends Exception> T executeWithRetry(String clientName, RetryCallback<T, E> callback) throws E {
         return getRetryTemplate(clientName).execute(callback);
     }
 
@@ -163,9 +161,8 @@ public final class PlatformRestClientRegistry {
         if (clientProps == null) {
             return null;
         }
-        var endpointProps = clientProps.endpoints() != null
-                ? clientProps.endpoints().get(endpointName)
-                : null;
+        var endpointProps =
+                clientProps.endpoints() != null ? clientProps.endpoints().get(endpointName) : null;
         var endpointLogging = endpointProps != null ? endpointProps.logging() : null;
         return LoggingProperties.merge(clientProps.logging(), endpointLogging);
     }
@@ -199,8 +196,7 @@ public final class PlatformRestClientRegistry {
                 && !props.retry().retryOnResponseStatuses().isEmpty()) {
             var retryStatuses = props.retry().retryOnResponseStatuses();
             builder.defaultStatusHandler(
-                    httpStatusCode -> retryStatuses.contains(httpStatusCode.value()),
-                    (request, response) -> {
+                    httpStatusCode -> retryStatuses.contains(httpStatusCode.value()), (request, response) -> {
                         throw new PlatformHttpStatusRetryException(
                                 response.getStatusCode().value(), request.getURI());
                     });
@@ -241,15 +237,14 @@ public final class PlatformRestClientRegistry {
     private RetryTemplate buildRetryTemplate(RetryProperties retryProps) {
         if (retryProps == null) {
             // No retry config — execute exactly once, never retry
-            return RetryTemplate.builder()
-                    .maxAttempts(1)
-                    .build();
+            return RetryTemplate.builder().maxAttempts(1).build();
         }
 
         int maxAttempts = retryProps.maxAttempts() != null ? retryProps.maxAttempts() : 3;
         var builder = RetryTemplate.builder().maxAttempts(maxAttempts);
 
-        if (retryProps.retryOnResponseStatuses() != null && !retryProps.retryOnResponseStatuses().isEmpty()) {
+        if (retryProps.retryOnResponseStatuses() != null
+                && !retryProps.retryOnResponseStatuses().isEmpty()) {
             builder.retryOn(PlatformHttpStatusRetryException.class);
         }
 
@@ -284,8 +279,8 @@ public final class PlatformRestClientRegistry {
         }
 
         @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-                                            ClientHttpRequestExecution execution) throws IOException {
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+                throws IOException {
             var uriBuilder = UriComponentsBuilder.fromUri(request.getURI());
             queryParams.forEach(uriBuilder::queryParam);
             var modifiedUri = uriBuilder.build(true).toUri();
@@ -326,9 +321,3 @@ public final class PlatformRestClientRegistry {
         }
     }
 }
-
-
-
-
-
-

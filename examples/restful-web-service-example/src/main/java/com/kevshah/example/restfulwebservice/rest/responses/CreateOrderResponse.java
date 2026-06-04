@@ -1,6 +1,3 @@
 package com.kevshah.example.restfulwebservice.rest.responses;
 
-public record CreateOrderResponse(
-        String orderId
-) {
-}
+public record CreateOrderResponse(String orderId) {}

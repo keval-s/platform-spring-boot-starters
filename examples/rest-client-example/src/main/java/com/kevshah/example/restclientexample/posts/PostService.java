@@ -2,11 +2,10 @@ package com.kevshah.example.restclientexample.posts;
 
 import com.kevshah.platform.starter.rest.client.PlatformRestClient;
 import com.kevshah.platform.starter.rest.client.PlatformRestClientRegistry;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.stereotype.Service;
 
 /// Service that fetches posts from the JSONPlaceholder API via the `posts-client`
 /// configured under `platform.rest.client.clients.posts-client`.
@@ -32,8 +31,7 @@ public class PostService {
     ///
     /// @return list of posts
     public List<Post> listPosts() {
-        return postsClient.get("list-posts", new ParameterizedTypeReference<>() {
-        });
+        return postsClient.get("list-posts", new ParameterizedTypeReference<>() {});
     }
 
     /// Returns a single post by its numeric identifier.
@@ -47,4 +45,3 @@ public class PostService {
         return postsClient.get("get-post", Map.of("id", id), Post.class);
     }
 }
-

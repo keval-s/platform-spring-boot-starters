@@ -19,7 +19,6 @@ import tools.jackson.databind.json.JsonMapper;
 @EnableConfigurationProperties(RestServerProperties.class)
 public class RestServerAutoConfiguration {
 
-
     /// Registers the [StandardRequestResponseLoggingFilter] bean when request/response
     /// logging is explicitly enabled via `platform.rest.server.logging.enabled=true`.
     ///
@@ -28,9 +27,8 @@ public class RestServerAutoConfiguration {
     /// @return a configured `StandardRequestResponseLoggingFilter` instance
     @Bean
     @ConditionalOnProperty(prefix = "platform.rest.server.logging", name = "enabled", havingValue = "true")
-    public StandardRequestResponseLoggingFilter standardRequestResponseLoggingFilter(RestServerProperties properties, JsonMapper jsonMapper) {
+    public StandardRequestResponseLoggingFilter standardRequestResponseLoggingFilter(
+            RestServerProperties properties, JsonMapper jsonMapper) {
         return new StandardRequestResponseLoggingFilter(properties, jsonMapper);
     }
-
-
 }

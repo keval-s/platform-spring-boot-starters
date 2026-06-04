@@ -20,15 +20,15 @@ import java.util.List;
 ///
 /// @param maxAttempts             Total number of attempts (first attempt + retries). Defaults to `3` when not set.
 /// @param waitDuration            Base wait duration between retry attempts. Defaults to `500ms` when not set.
-/// @param multiplier              Multiplier applied to `waitDuration` for exponential back-off. A value of `1.0` (or omitting this field) uses fixed back-off.
-/// @param maxWaitDuration         Maximum wait duration cap when exponential back-off is active. Ignored when `multiplier` is `1.0` or absent.
-/// @param retryOnResponseStatuses HTTP response status codes that should trigger a retry. When a response arrives with one of these codes a `PlatformHttpStatusRetryException` is thrown so the retry template can re-execute the request.
+/// @param multiplier              Multiplier applied to `waitDuration` for exponential back-off. A value of `1.0` (or
+/// omitting this field) uses fixed back-off.
+/// @param maxWaitDuration         Maximum wait duration cap when exponential back-off is active. Ignored when
+/// `multiplier` is `1.0` or absent.
+/// @param retryOnResponseStatuses HTTP response status codes that should trigger a retry. When a response arrives with
+/// one of these codes a `PlatformHttpStatusRetryException` is thrown so the retry template can re-execute the request.
 public record RetryProperties(
         Integer maxAttempts,
         Duration waitDuration,
         Double multiplier,
         Duration maxWaitDuration,
-        List<Integer> retryOnResponseStatuses
-) {
-}
-
+        List<Integer> retryOnResponseStatuses) {}

@@ -1,9 +1,23 @@
 package com.kevshah.platform.starter.rest.client.logging;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.kevshah.platform.starter.rest.client.config.LoggingProperties;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,21 +32,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RestClientLoggingInterceptorTest {
@@ -200,7 +199,10 @@ class RestClientLoggingInterceptorTest {
 
         @BeforeEach
         void setUp() throws IOException {
-            var config = new LoggingProperties(true, "INFO", null,
+            var config = new LoggingProperties(
+                    true,
+                    "INFO",
+                    null,
                     new LoggingProperties.ResponseConfig(new LoggingProperties.PayloadConfig(true), null));
             var context = new LoggingContext("svc", "find", config);
             attributes = new HashMap<>();
@@ -209,8 +211,8 @@ class RestClientLoggingInterceptorTest {
 
             when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
             when(mockResponse.getHeaders()).thenReturn(new HttpHeaders());
-            when(mockResponse.getBody()).thenReturn(
-                    new ByteArrayInputStream("{\"id\":\"item-1\"}".getBytes(StandardCharsets.UTF_8)));
+            when(mockResponse.getBody())
+                    .thenReturn(new ByteArrayInputStream("{\"id\":\"item-1\"}".getBytes(StandardCharsets.UTF_8)));
             when(execution.execute(eq(request), any())).thenReturn(mockResponse);
         }
 
@@ -271,8 +273,11 @@ class RestClientLoggingInterceptorTest {
 
         @BeforeEach
         void setUp() throws IOException {
-            var config = new LoggingProperties(true, "DEBUG",
-                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(true), null), null);
+            var config = new LoggingProperties(
+                    true,
+                    "DEBUG",
+                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(true), null),
+                    null);
             var context = new LoggingContext("svc", "create", config);
             attributes = new HashMap<>();
             attributes.put(RestClientLoggingInterceptor.ATTRIBUTE_KEY, context);
@@ -320,7 +325,9 @@ class RestClientLoggingInterceptorTest {
         @Test
         void intercept_logHeadersTrue_requestCompletesSuccessfully() throws IOException {
             // Given
-            var config = new LoggingProperties(true, "INFO",
+            var config = new LoggingProperties(
+                    true,
+                    "INFO",
                     new LoggingProperties.RequestConfig(null, new LoggingProperties.HeadersConfig(true, null, null)),
                     new LoggingProperties.ResponseConfig(null, new LoggingProperties.HeadersConfig(true, null, null)));
             var context = new LoggingContext("svc", "list", config);
@@ -351,8 +358,8 @@ class RestClientLoggingInterceptorTest {
 
         @BeforeEach
         void setUp() throws IOException {
-            interceptorLogger = (ch.qos.logback.classic.Logger)
-                    LoggerFactory.getLogger(RestClientLoggingInterceptor.class);
+            interceptorLogger =
+                    (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(RestClientLoggingInterceptor.class);
             interceptorLogger.setLevel(Level.TRACE);
             listAppender = new ListAppender<>();
             listAppender.start();
@@ -385,13 +392,14 @@ class RestClientLoggingInterceptorTest {
                     .filter(e -> "REST client request".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
-            assertThat(keys).containsExactlyInAnyOrder(
-                    "platform.rest-client.name",
-                    "platform.rest-client.endpoint",
-                    "platform.rest-client.http.request.method",
-                    "platform.rest-client.http.request.url"
-            );
+            var keys =
+                    requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            assertThat(keys)
+                    .containsExactlyInAnyOrder(
+                            "platform.rest-client.name",
+                            "platform.rest-client.endpoint",
+                            "platform.rest-client.http.request.method",
+                            "platform.rest-client.http.request.url");
         }
 
         @Test
@@ -413,7 +421,8 @@ class RestClientLoggingInterceptorTest {
                     .findFirst()
                     .orElseThrow();
             var kvpMap = toMap(requestEvent.getKeyValuePairs());
-            assertThat(kvpMap).containsEntry("platform.rest-client.name", "payment-service")
+            assertThat(kvpMap)
+                    .containsEntry("platform.rest-client.name", "payment-service")
                     .containsEntry("platform.rest-client.endpoint", "listPayments")
                     .containsEntry("platform.rest-client.http.request.method", "GET")
                     .containsEntry("platform.rest-client.http.request.url", "http://localhost/api/v1/items");
@@ -437,15 +446,17 @@ class RestClientLoggingInterceptorTest {
                     .filter(e -> "REST client response".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = responseEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
-            assertThat(keys).contains(
-                    "platform.rest-client.name",
-                    "platform.rest-client.endpoint",
-                    "platform.rest-client.http.request.method",
-                    "platform.rest-client.http.request.url",
-                    "platform.rest-client.http.response.status",
-                    "platform.rest-client.http.duration-ms"
-            );
+            var keys = responseEvent.getKeyValuePairs().stream()
+                    .map(kvp -> kvp.key)
+                    .toList();
+            assertThat(keys)
+                    .contains(
+                            "platform.rest-client.name",
+                            "platform.rest-client.endpoint",
+                            "platform.rest-client.http.request.method",
+                            "platform.rest-client.http.request.url",
+                            "platform.rest-client.http.response.status",
+                            "platform.rest-client.http.duration-ms");
         }
 
         @Test
@@ -510,8 +521,11 @@ class RestClientLoggingInterceptorTest {
         @Test
         void intercept_logRequestBodyTrueWithNonEmptyBody_requestBodyKeyPresentInRequestLog() throws IOException {
             // Given
-            var config = new LoggingProperties(true, "INFO",
-                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(true), null), null);
+            var config = new LoggingProperties(
+                    true,
+                    "INFO",
+                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(true), null),
+                    null);
             var context = new LoggingContext("svc", "create", config);
             var attributes = new HashMap<String, Object>();
             attributes.put(RestClientLoggingInterceptor.ATTRIBUTE_KEY, context);
@@ -534,8 +548,11 @@ class RestClientLoggingInterceptorTest {
         @Test
         void intercept_logRequestBodyTrueWithEmptyBody_requestBodyKeyAbsentFromRequestLog() throws IOException {
             // Given
-            var config = new LoggingProperties(true, "INFO",
-                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(true), null), null);
+            var config = new LoggingProperties(
+                    true,
+                    "INFO",
+                    new LoggingProperties.RequestConfig(new LoggingProperties.PayloadConfig(true), null),
+                    null);
             var context = new LoggingContext("svc", "create", config);
             var attributes = new HashMap<String, Object>();
             attributes.put(RestClientLoggingInterceptor.ATTRIBUTE_KEY, context);
@@ -550,7 +567,8 @@ class RestClientLoggingInterceptorTest {
                     .filter(e -> "REST client request".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys =
+                    requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
             assertThat(keys).doesNotContain("platform.rest-client.http.request.body");
         }
 
@@ -573,21 +591,25 @@ class RestClientLoggingInterceptorTest {
                     .filter(e -> "REST client request".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys =
+                    requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
             assertThat(keys).doesNotContain("platform.rest-client.http.request.body");
         }
 
         @Test
         void intercept_logResponseBodyTrue_responseBodyKeyPresentInResponseLog() throws IOException {
             // Given
-            var config = new LoggingProperties(true, "INFO", null,
+            var config = new LoggingProperties(
+                    true,
+                    "INFO",
+                    null,
                     new LoggingProperties.ResponseConfig(new LoggingProperties.PayloadConfig(true), null));
             var context = new LoggingContext("svc", "find", config);
             var attributes = new HashMap<String, Object>();
             attributes.put(RestClientLoggingInterceptor.ATTRIBUTE_KEY, context);
             var request = new StubHttpRequest(attributes);
-            when(mockResponse.getBody()).thenReturn(
-                    new ByteArrayInputStream("{\"id\":\"item-1\"}".getBytes(StandardCharsets.UTF_8)));
+            when(mockResponse.getBody())
+                    .thenReturn(new ByteArrayInputStream("{\"id\":\"item-1\"}".getBytes(StandardCharsets.UTF_8)));
             when(execution.execute(eq(request), any())).thenReturn(mockResponse);
 
             // When
@@ -620,14 +642,18 @@ class RestClientLoggingInterceptorTest {
                     .filter(e -> "REST client response".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = responseEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys = responseEvent.getKeyValuePairs().stream()
+                    .map(kvp -> kvp.key)
+                    .toList();
             assertThat(keys).doesNotContain("platform.rest-client.http.response.body");
         }
 
         @Test
         void intercept_logHeadersTrue_requestHeadersKeyPresentInRequestLog() throws IOException {
             // Given
-            var config = new LoggingProperties(true, "INFO",
+            var config = new LoggingProperties(
+                    true,
+                    "INFO",
                     new LoggingProperties.RequestConfig(null, new LoggingProperties.HeadersConfig(true, null, null)),
                     new LoggingProperties.ResponseConfig(null, new LoggingProperties.HeadersConfig(true, null, null)));
             var context = new LoggingContext("svc", "list", config);
@@ -644,14 +670,17 @@ class RestClientLoggingInterceptorTest {
                     .filter(e -> "REST client request".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys =
+                    requestEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
             assertThat(keys).contains("platform.rest-client.http.request.headers");
         }
 
         @Test
         void intercept_logHeadersTrue_responseHeadersKeyPresentInResponseLog() throws IOException {
             // Given
-            var config = new LoggingProperties(true, "INFO",
+            var config = new LoggingProperties(
+                    true,
+                    "INFO",
                     new LoggingProperties.RequestConfig(null, new LoggingProperties.HeadersConfig(true, null, null)),
                     new LoggingProperties.ResponseConfig(null, new LoggingProperties.HeadersConfig(true, null, null)));
             var context = new LoggingContext("svc", "list", config);
@@ -668,7 +697,9 @@ class RestClientLoggingInterceptorTest {
                     .filter(e -> "REST client response".equals(e.getMessage()))
                     .findFirst()
                     .orElseThrow();
-            var keys = responseEvent.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+            var keys = responseEvent.getKeyValuePairs().stream()
+                    .map(kvp -> kvp.key)
+                    .toList();
             assertThat(keys).contains("platform.rest-client.http.response.headers");
         }
 
@@ -689,8 +720,10 @@ class RestClientLoggingInterceptorTest {
             assertThat(listAppender.list).hasSize(2);
             for (var event : listAppender.list) {
                 var keys = event.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
-                assertThat(keys).doesNotContain("platform.rest-client.http.request.headers",
-                        "platform.rest-client.http.response.headers");
+                assertThat(keys)
+                        .doesNotContain(
+                                "platform.rest-client.http.request.headers",
+                                "platform.rest-client.http.response.headers");
             }
         }
 
@@ -739,6 +772,3 @@ class RestClientLoggingInterceptorTest {
         }
     }
 }
-
-
-

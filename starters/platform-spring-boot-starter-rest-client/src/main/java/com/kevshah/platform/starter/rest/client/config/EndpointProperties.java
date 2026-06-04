@@ -1,8 +1,7 @@
 package com.kevshah.platform.starter.rest.client.config;
 
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
-
 import java.util.Map;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /// Configuration for a single named endpoint on a REST client.
 ///
@@ -28,18 +27,20 @@ import java.util.Map;
 /// ```
 ///
 /// @param method             HTTP method for this endpoint (e.g. `GET`, `POST`, `PUT`, `PATCH`, `DELETE`).
-/// @param path               URL path relative to the client's `base-url`. May contain URI template variables such as `/api/v1/payments/{id}`.
-/// @param defaultQueryParams Default query parameters appended to every request targeting this endpoint. These are merged on top of any client-level `default-query-params`.
-/// @param contentType        Content-Type header override for this endpoint. When set, this takes precedence over the client-level `default-content-type`.
-/// @param accept             Accept header override for this endpoint. When set, this takes precedence over the client-level `default-accept`.
-/// @param logging            Logging overrides for this endpoint. Non-`null` fields override the corresponding client-level `logging` settings.
+/// @param path               URL path relative to the client's `base-url`. May contain URI template variables such as
+/// `/api/v1/payments/{id}`.
+/// @param defaultQueryParams Default query parameters appended to every request targeting this endpoint. These are
+/// merged on top of any client-level `default-query-params`.
+/// @param contentType        Content-Type header override for this endpoint. When set, this takes precedence over the
+/// client-level `default-content-type`.
+/// @param accept             Accept header override for this endpoint. When set, this takes precedence over the
+/// client-level `default-accept`.
+/// @param logging            Logging overrides for this endpoint. Non-`null` fields override the corresponding
+/// client-level `logging` settings.
 public record EndpointProperties(
         String method,
         String path,
         Map<String, String> defaultQueryParams,
         String contentType,
         String accept,
-        @NestedConfigurationProperty LoggingProperties logging
-) {
-}
-
+        @NestedConfigurationProperty LoggingProperties logging) {}

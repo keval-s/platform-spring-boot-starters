@@ -1,8 +1,7 @@
 package com.kevshah.platform.starter.rest.client.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.Map;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /// Top-level configuration properties for `platform-spring-boot-starter-rest-client`.
 ///
@@ -10,10 +9,7 @@ import java.util.Map;
 /// Each key in `clients` names a logical REST client and maps to a `ClientProperties`
 /// record describing its base URL, endpoints, retry settings, and SSL bundle.
 ///
-/// @param clients Named REST client definitions. Each key becomes the logical client name used throughout `PlatformRestClientRegistry` method calls.
+/// @param clients Named REST client definitions. Each key becomes the logical client name used throughout
+/// `PlatformRestClientRegistry` method calls.
 @ConfigurationProperties(prefix = "platform.rest.client")
-public record RestClientProperties(
-        Map<String, ClientProperties> clients
-) {
-}
-
+public record RestClientProperties(Map<String, ClientProperties> clients) {}

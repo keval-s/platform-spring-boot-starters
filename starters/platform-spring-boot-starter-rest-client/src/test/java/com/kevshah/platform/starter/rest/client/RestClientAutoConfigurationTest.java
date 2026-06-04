@@ -1,17 +1,17 @@
 package com.kevshah.platform.starter.rest.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class RestClientAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(
-                    com.kevshah.platform.starter.rest.client.RestClientAutoConfiguration.class));
+            .withConfiguration(
+                    AutoConfigurations.of(com.kevshah.platform.starter.rest.client.RestClientAutoConfiguration.class));
 
     @Nested
     class WhenNoClientsConfigured {
@@ -43,9 +43,7 @@ class RestClientAutoConfigurationTest {
         void platformRestClientRegistry_singleClientConfigured_registryContainsClientName() {
             // Given/When
             contextRunner
-                    .withPropertyValues(
-                            "platform.rest.client.clients.payment-service.base-url=http://localhost:8080"
-                    )
+                    .withPropertyValues("platform.rest.client.clients.payment-service.base-url=http://localhost:8080")
                     .run(context -> {
                         // Then
                         assertThat(context).hasSingleBean(PlatformRestClientRegistry.class);
@@ -60,8 +58,7 @@ class RestClientAutoConfigurationTest {
             contextRunner
                     .withPropertyValues(
                             "platform.rest.client.clients.payment-service.base-url=http://payment:8080",
-                            "platform.rest.client.clients.order-service.base-url=http://order:8081"
-                    )
+                            "platform.rest.client.clients.order-service.base-url=http://order:8081")
                     .run(context -> {
                         // Then
                         var registry = context.getBean(PlatformRestClientRegistry.class);
@@ -78,8 +75,7 @@ class RestClientAutoConfigurationTest {
                             "platform.rest.client.clients.payment-service.base-url=http://localhost:8080",
                             "platform.rest.client.clients.payment-service.retry.max-attempts=3",
                             "platform.rest.client.clients.payment-service.retry.wait-duration=500ms",
-                            "platform.rest.client.clients.payment-service.retry.retry-on-response-statuses=503,504"
-                    )
+                            "platform.rest.client.clients.payment-service.retry.retry-on-response-statuses=503,504")
                     .run(context -> {
                         // Then
                         assertThat(context).hasSingleBean(PlatformRestClientRegistry.class);
@@ -95,8 +91,7 @@ class RestClientAutoConfigurationTest {
                     .withPropertyValues(
                             "platform.rest.client.clients.payment-service.base-url=http://localhost:8080",
                             "platform.rest.client.clients.payment-service.endpoints.create-payment.method=POST",
-                            "platform.rest.client.clients.payment-service.endpoints.create-payment.path=/api/v1/payments"
-                    )
+                            "platform.rest.client.clients.payment-service.endpoints.create-payment.path=/api/v1/payments")
                     .run(context -> {
                         // Then
                         var registry = context.getBean(PlatformRestClientRegistry.class);
@@ -120,5 +115,3 @@ class RestClientAutoConfigurationTest {
         }
     }
 }
-
-

@@ -6,6 +6,4 @@ package com.kevshah.example.restclientexample.posts;
 /// @param id     unique post identifier
 /// @param title  title of the post
 /// @param body   full text body of the post
-public record Post(Integer userId, Integer id, String title, String body) {
-}
-
+public record Post(Integer userId, Integer id, String title, String body) {}

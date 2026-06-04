@@ -11,7 +11,4 @@ import com.kevshah.platform.starter.rest.client.config.LoggingProperties;
 /// @param clientName   logical name of the REST client
 /// @param endpointName logical name of the endpoint being invoked
 /// @param config       merged logging configuration effective for this call
-public record LoggingContext(String clientName, String endpointName, LoggingProperties config) {
-}
-
-
+public record LoggingContext(String clientName, String endpointName, LoggingProperties config) {}

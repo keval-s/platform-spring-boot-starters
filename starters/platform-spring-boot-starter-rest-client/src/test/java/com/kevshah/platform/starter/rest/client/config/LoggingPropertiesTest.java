@@ -1,12 +1,10 @@
 package com.kevshah.platform.starter.rest.client.config;
 
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.as;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 class LoggingPropertiesTest {
 
@@ -50,27 +48,24 @@ class LoggingPropertiesTest {
         @Test
         void merge_overrideFieldsNonNull_overrideWins() {
             // Given
-            var base = new LoggingProperties(false, "INFO",
+            var base = new LoggingProperties(
+                    false,
+                    "INFO",
                     new LoggingProperties.RequestConfig(
                             new LoggingProperties.PayloadConfig(false),
-                            new LoggingProperties.HeadersConfig(false, null, null)
-                    ),
+                            new LoggingProperties.HeadersConfig(false, null, null)),
                     new LoggingProperties.ResponseConfig(
                             new LoggingProperties.PayloadConfig(false),
-                            new LoggingProperties.HeadersConfig(false, null, null)
-                    )
-            );
-            var override = new LoggingProperties(true, "DEBUG",
+                            new LoggingProperties.HeadersConfig(false, null, null)));
+            var override = new LoggingProperties(
+                    true,
+                    "DEBUG",
                     new LoggingProperties.RequestConfig(
                             new LoggingProperties.PayloadConfig(true),
-                            new LoggingProperties.HeadersConfig(true, List.of("X-Request-Id"), null)
-                    ),
+                            new LoggingProperties.HeadersConfig(true, List.of("X-Request-Id"), null)),
                     new LoggingProperties.ResponseConfig(
                             new LoggingProperties.PayloadConfig(true),
-                            new LoggingProperties.HeadersConfig(true, null, List.of("Set-Cookie")
-                            )
-                    )
-            );
+                            new LoggingProperties.HeadersConfig(true, null, List.of("Set-Cookie"))));
 
             // When
             var result = LoggingProperties.merge(base, override);
@@ -97,16 +92,15 @@ class LoggingPropertiesTest {
         @Test
         void merge_overrideFieldsNull_baseFallbackUsed() {
             // Given
-            var base = new LoggingProperties(true, "WARN",
+            var base = new LoggingProperties(
+                    true,
+                    "WARN",
                     new LoggingProperties.RequestConfig(
                             new LoggingProperties.PayloadConfig(true),
-                            new LoggingProperties.HeadersConfig(true, null, null)
-                    ),
+                            new LoggingProperties.HeadersConfig(true, null, null)),
                     new LoggingProperties.ResponseConfig(
                             new LoggingProperties.PayloadConfig(true),
-                            new LoggingProperties.HeadersConfig(true, null, null)
-                    )
-            );
+                            new LoggingProperties.HeadersConfig(true, null, null)));
             var override = new LoggingProperties(null, null, null, null);
 
             // When
@@ -131,22 +125,21 @@ class LoggingPropertiesTest {
             assertThat(result.response().headers().exclude()).isNull();
         }
 
-//        @Test
-//        void merge_partialOverride_mixesBaseAndOverride() {
-//            // Given
-//            var base = new LoggingProperties(false, true, false, true, "INFO");
-//            var override = new LoggingProperties(true, null, true, null, null);
-//
-//            // When
-//            var result = LoggingProperties.merge(base, override);
-//
-//            // Then
-//            assertThat(result.enabled()).isTrue();         // override wins
-//            assertThat(result.requestBody()).isTrue();  // base fallback
-//            assertThat(result.responseBody()).isTrue(); // override wins
-//            assertThat(result.headers()).isTrue();      // base fallback
-//            assertThat(result.level()).isEqualTo("INFO");  // base fallback
-//        }
+        //        @Test
+        //        void merge_partialOverride_mixesBaseAndOverride() {
+        //            // Given
+        //            var base = new LoggingProperties(false, true, false, true, "INFO");
+        //            var override = new LoggingProperties(true, null, true, null, null);
+        //
+        //            // When
+        //            var result = LoggingProperties.merge(base, override);
+        //
+        //            // Then
+        //            assertThat(result.enabled()).isTrue();         // override wins
+        //            assertThat(result.requestBody()).isTrue();  // base fallback
+        //            assertThat(result.responseBody()).isTrue(); // override wins
+        //            assertThat(result.headers()).isTrue();      // base fallback
+        //            assertThat(result.level()).isEqualTo("INFO");  // base fallback
+        //        }
     }
 }
-

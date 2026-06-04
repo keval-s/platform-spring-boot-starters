@@ -7,8 +7,4 @@ package com.kevshah.platform.starter.rest.client.config;
 ///
 /// @param bundle Name of the SSL bundle (as configured under `spring.ssl.bundle.*`) to apply
 ///               to this client's connections.
-public record SslProperties(
-        String bundle
-) {
-}
-
+public record SslProperties(String bundle) {}

@@ -39,7 +39,5 @@ public final class HttpLoggingKeys {
     /// Raw response body string (present only when response-body logging is enabled).
     public static final String RESPONSE_BODY = "platform.rest-client.http.response.body";
 
-    private HttpLoggingKeys() {
-    }
+    private HttpLoggingKeys() {}
 }
-
