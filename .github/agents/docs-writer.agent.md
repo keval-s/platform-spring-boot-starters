@@ -34,8 +34,8 @@ non-Markdown file. If a task requires changes outside this scope, stop and notif
    to confirm before writing anything. This ensures alignment on scope before you invest time in writing.
 2. **Write:** Produce the documentation according to the confirmed plan, strictly following the structure rules,
    section ordering, and formatting conventions defined in the skill document.
-3. **Verify:** Before finalizing your response, silently review your output against the Quick-Reference Checklist at the
-   bottom of `SKILL.md`. In particular:
+3. **Verify:** Before finalizing your response, silently review your output against the Quick-Reference Checklist in
+   the `write-documentation` skill. In particular:
    - Confirm that every property path in `CONFIGURATIONS.md` matches the actual `@ConfigurationProperties` prefix and
      field names in the Java source.
    - Confirm that any version numbers mentioned match the single source of truth in the Maven POMs.
