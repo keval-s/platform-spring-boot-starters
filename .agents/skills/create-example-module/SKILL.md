@@ -159,7 +159,7 @@ Rules:
 - The class must be named `Application`.
 - Place it directly in the base package (`com.kevshah.example.<namewithnohyphens>`), not
   in a sub-package, so that Spring's component scan covers the entire module.
-- Do **not** add a `///` Javadoc comment to `Application` — it is boilerplate.
+- Do **not** add a Javadoc comment to `Application` — it is boilerplate.
 
 ---
 

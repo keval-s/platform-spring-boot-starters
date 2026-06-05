@@ -167,15 +167,17 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
-/// Auto-configuration for the `platform-spring-boot-starter-<name>` starter.
+/**
+ * Autoconfiguration for the {@code platform-spring-boot-starter-<name>} starter.
+ */
 @AutoConfiguration
 @ConditionalOnWebApplication   // add appropriate @ConditionalOn* annotations
 public class <Name>AutoConfiguration {
 
-    @Bean
-    public MyFeatureBean myFeatureBean() {
-        return new MyFeatureBean();
-    }
+  @Bean
+  public MyFeatureBean myFeatureBean() {
+    return new MyFeatureBean();
+  }
 }
 ```
 
@@ -186,7 +188,7 @@ Rules:
 - Use `@ConditionalOnProperty` with `havingValue` to gate optional beans behind a config
   flag (see the rest-server starter for an example).
 - Keep the auto-configuration class lean — delegate complexity to collaborating classes.
-- Document the class with Markdown Javadoc (`///`) following `AGENTS.md §5`.
+- Document the class with Javadocs following `AGENTS.md §5`.
 
 ---
 
@@ -252,9 +254,11 @@ package com.kevshah.platform.starter.<name>.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/// Top-level configuration properties for `platform-spring-boot-starter-<name>`.
-///
-/// All properties are nested under the `platform.<short-name-with-dots>` prefix.
+/**
+ * Top-level configuration properties for {@code platform-spring-boot-starter-<name>}.
+ * <p>
+ * All properties are nested under the {@code platform.<short-name-with-dots>} prefix.
+ */
 @ConfigurationProperties(prefix = "platform.<short-name-with-dots>")
 public record <Name>Properties(
         Boolean enabled
