@@ -18,16 +18,16 @@ mvn clean install
 ## Repository Structure
 
 ```
-platform-spring-boot-starters/
-├── platform-spring-boot-starter-dependencies/   # BOM — centralised dependency versions
-├── platform-spring-boot-starter-parent/          # Consumer-facing parent POM
-├── platform-spring-boot-starter-build-parent/    # Internal build parent POM
+platform-spring-boot-starters/                     # Root aggregator module (packaging type 'pom')
+├── platform-spring-boot-starter-dependencies/     # BOM — centralised dependency versions
+├── platform-spring-boot-starter-parent/           # Consumer-facing parent POM (parent: spring-boot-starter-parent)
+├── platform-spring-boot-starter-build-parent/     # Internal build parent POM (parent: spring-boot-starter-parent)
 ├── starters/                                      # Auto-configuration starter modules
-│   ├── platform-spring-boot-starter-rest-client/ # REST client starter
-│   └── platform-spring-boot-starter-rest-server/ # REST server starter
+│   ├── platform-spring-boot-starter-rest-client/  # REST client starter (parent: platform-spring-boot-starter-build-parent)
+│   └── platform-spring-boot-starter-rest-server/  # REST server starter (parent: platform-spring-boot-starter-build-parent)
 └── examples/                                      # Runnable example applications
-    ├── rest-client-example/                       # Example demonstrating the rest-client starter
-    └── restful-web-service-example/               # Example RESTful web service
+    ├── rest-client-example/                       # Example demonstrating the rest-client starter (parent: platform-spring-boot-starter-parent)
+    └── restful-web-service-example/               # Example RESTful web service (parent: platform-spring-boot-starter-parent)
 ```
 
 ## Modules
