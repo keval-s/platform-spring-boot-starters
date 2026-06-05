@@ -29,33 +29,39 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/// Central registry that holds all pre-configured `RestClient` instances and their
-/// corresponding `RetryTemplate`s.
-///
-/// One `RestClient` and one `RetryTemplate` are created per named client declared under
-/// `platform.rest.client.clients.*`. Consumers inject this bean by type and obtain a
-/// `PlatformRestClient` scoped to a specific named client:
-///
-/// ```java
-/// @Autowired PlatformRestClientRegistry registry;
-///
-/// PlatformRestClient paymentClient = registry.getPlatformRestClient("payment-service");
-///
-/// var result = paymentClient.post("create-payment", request, PaymentResponse.class);
-/// ```
-///
-/// The bean is registered under the name `platformRestClientRegistry` to avoid
-/// collisions with any other beans in the application context.
+/**
+ * Central registry that holds all pre-configured {@code RestClient} instances and their corresponding
+ * {@code RetryTemplate}s.
+ *
+ * <p>One {@code RestClient} and one {@code RetryTemplate} are created per named client declared under
+ * {@code platform.rest.client.clients.*}. Consumers inject this bean by type and obtain a {@code PlatformRestClient}
+ * scoped to a specific named client:
+ *
+ * <p>
+ *
+ * <pre>{@code
+ * @Autowired PlatformRestClientRegistry registry;
+ *
+ * PlatformRestClient paymentClient = registry.getPlatformRestClient("payment-service");
+ *
+ * var result = paymentClient.post("create-payment", request, PaymentResponse.class);
+ * }</pre>
+ *
+ * <p>The bean is registered under the name {@code platformRestClientRegistry} to avoid collisions with any other beans
+ * in the application context.
+ */
 public final class PlatformRestClientRegistry {
 
     private final Map<String, RestClient> clients;
     private final Map<String, RetryTemplate> retryTemplates;
     private final RestClientProperties properties;
 
-    /// Constructs the registry and eagerly builds all configured clients.
-    ///
-    /// - `properties` — the bound `@ConfigurationProperties` record.
-    /// - `sslBundles` — optional; when `null` the JVM's default SSL context is used for all clients.
+    /**
+     * Constructs the registry and eagerly builds all configured clients.
+     *
+     * @param properties the bound {@code @ConfigurationProperties} record.
+     * @param sslBundles optional; when {@code null} the JVM's default SSL context is used for all clients.
+     */
     public PlatformRestClientRegistry(RestClientProperties properties, SslBundles sslBundles) {
         this.properties = properties;
 
@@ -73,10 +79,15 @@ public final class PlatformRestClientRegistry {
         this.retryTemplates = Collections.unmodifiableMap(retryMap);
     }
 
-    /// Returns the pre-built `RestClient` for the named client.
-    ///
-    /// Package-private — used internally by `PlatformRestClient`.
-    /// Throws `NoSuchElementException` when no client with that name is configured.
+    /**
+     * Returns the pre-built {@code RestClient} for the named client.
+     *
+     * <p>Package-private &mdash; used internally by {@code PlatformRestClient}. Throws {@code NoSuchElementException}
+     * when no client with that name is configured.
+     *
+     * @param clientName the name of the client to retrieve
+     * @return the configured {@code RestClient}
+     */
     RestClient getClient(String clientName) {
         var client = clients.get(clientName);
         if (client == null) {
@@ -85,12 +96,16 @@ public final class PlatformRestClientRegistry {
         return client;
     }
 
-    /// Returns the `RetryTemplate` for the named client.
-    ///
-    /// Package-private — used internally by `PlatformRestClient` via `executeWithRetry`.
-    /// When no retry configuration is present for the client, a single-attempt
-    /// `RetryTemplate` (effectively no retry) is returned.
-    /// Throws `NoSuchElementException` when no client with that name is configured.
+    /**
+     * Returns the {@code RetryTemplate} for the named client.
+     *
+     * <p>Package-private &mdash; used internally by {@code PlatformRestClient} via {@code executeWithRetry}. When no
+     * retry configuration is present for the client, a single-attempt {@code RetryTemplate} (effectively no retry) is
+     * returned. Throws {@code NoSuchElementException} when no client with that name is configured.
+     *
+     * @param clientName the name of the client to retrieve
+     * @return the configured {@code RetryTemplate}
+     */
     RetryTemplate getRetryTemplate(String clientName) {
         var template = retryTemplates.get(clientName);
         if (template == null) {
@@ -99,10 +114,16 @@ public final class PlatformRestClientRegistry {
         return template;
     }
 
-    /// Returns the `EndpointProperties` for the named endpoint on the named client.
-    ///
-    /// Package-private — used internally by `PlatformRestClient` to resolve endpoint config.
-    /// Throws `NoSuchElementException` when either the client or the endpoint is not configured.
+    /**
+     * Returns the {@code EndpointProperties} for the named endpoint on the named client.
+     *
+     * <p>Package-private &mdash; used internally by {@code PlatformRestClient} to resolve endpoint config. Throws
+     * {@code NoSuchElementException} when either the client or the endpoint is not configured.
+     *
+     * @param clientName the name of the client
+     * @param endpointName the name of the endpoint
+     * @return the configured {@code EndpointProperties}
+     */
     EndpointProperties getEndpoint(String clientName, String endpointName) {
         var clientProps = properties.clients() != null ? properties.clients().get(clientName) : null;
         if (clientProps == null) {
@@ -116,26 +137,38 @@ public final class PlatformRestClientRegistry {
         return endpoint;
     }
 
-    /// Executes the given `RetryCallback` using the `RetryTemplate` of the named client.
-    ///
-    /// Package-private — called by `PlatformRestClient` to wrap every HTTP call in the
-    /// client's retry policy.
-    /// When the client is configured with `retry.retry-on-response-statuses`, the
-    /// `RestClient` built for that client automatically throws
-    /// `PlatformHttpStatusRetryException` for matching status codes, causing the
-    /// `RetryTemplate` to re-execute the callback.
-    ///
-    /// Throws `NoSuchElementException` when the named client is not configured.
+    /**
+     * Executes the given {@code RetryCallback} using the {@code RetryTemplate} of the named client.
+     *
+     * <p>Package-private &mdash; called by {@code PlatformRestClient} to wrap every HTTP call in the client's retry
+     * policy. When the client is configured with {@code retry.retry-on-response-statuses}, the {@code RestClient} built
+     * for that client automatically throws {@code PlatformHttpStatusRetryException} for matching status codes, causing
+     * the {@code RetryTemplate} to re-execute the callback.
+     *
+     * <p>Throws {@code NoSuchElementException} when the named client is not configured.
+     *
+     * @param clientName the name of the client
+     * @param callback the callback containing the REST call to execute
+     * @param <T> the return type of the callback
+     * @param <E> the type of exception thrown by the callback
+     * @return the result of the executed callback
+     * @throws E if the callback throws an exception
+     */
     <T, E extends Exception> T executeWithRetry(String clientName, RetryCallback<T, E> callback) throws E {
         return getRetryTemplate(clientName).execute(callback);
     }
 
-    /// Returns a `PlatformRestClient` scoped to the named client.
-    ///
-    /// The returned client provides endpoint-aware typed methods that automatically
-    /// apply the client's retry policy, endpoint-level headers, and query parameters.
-    ///
-    /// Throws `NoSuchElementException` when no client with that name is configured.
+    /**
+     * Returns a {@code PlatformRestClient} scoped to the named client.
+     *
+     * <p>The returned client provides endpoint-aware typed methods that automatically apply the client's retry policy,
+     * endpoint-level headers, and query parameters.
+     *
+     * <p>Throws {@code NoSuchElementException} when no client with that name is configured.
+     *
+     * @param clientName the name of the client
+     * @return a new {@code PlatformRestClient} instance
+     */
     public PlatformRestClient getPlatformRestClient(String clientName) {
         if (!clients.containsKey(clientName)) {
             throw new NoSuchElementException("No REST client configured with name: '" + clientName + "'");
@@ -143,19 +176,29 @@ public final class PlatformRestClientRegistry {
         return new PlatformRestClient(clientName, this);
     }
 
-    /// Returns an unmodifiable set of all configured client names.
+    /**
+     * Returns an unmodifiable set of all configured client names.
+     *
+     * @return the set of client names
+     */
     public Set<String> getClientNames() {
         return clients.keySet();
     }
 
-    /// Returns the effective `LoggingProperties` for the named endpoint on the named client.
-    ///
-    /// The result is produced by merging the client-level `logging` settings with the
-    /// endpoint-level `logging` settings, where non-`null` endpoint fields take precedence.
-    /// Returns `null` when neither the client nor the endpoint has logging configured.
-    ///
-    /// Package-private — used by `PlatformRestClient` to set the logging context attribute
-    /// on each request.
+    /**
+     * Returns the effective {@code LoggingProperties} for the named endpoint on the named client.
+     *
+     * <p>The result is produced by merging the client-level {@code logging} settings with the endpoint-level
+     * {@code logging} settings, where non-{@code null} endpoint fields take precedence. Returns {@code null} when
+     * neither the client nor the endpoint has logging configured.
+     *
+     * <p>Package-private &mdash; used by {@code PlatformRestClient} to set the logging context attribute on each
+     * request.
+     *
+     * @param clientName the name of the client
+     * @param endpointName the name of the endpoint
+     * @return the merged {@code LoggingProperties}, or {@code null}
+     */
     LoggingProperties getEffectiveLogging(String clientName, String endpointName) {
         var clientProps = properties.clients() != null ? properties.clients().get(clientName) : null;
         if (clientProps == null) {
@@ -268,8 +311,9 @@ public final class PlatformRestClientRegistry {
     // Private interceptor
     // -------------------------------------------------------------------------
 
-    /// `ClientHttpRequestInterceptor` that appends a fixed set of query parameters to
-    /// every outbound request URI.
+    /**
+     * {@code ClientHttpRequestInterceptor} that appends a fixed set of query parameters to every outbound request URI.
+     */
     private static final class DefaultQueryParamsInterceptor implements ClientHttpRequestInterceptor {
 
         private final Map<String, String> queryParams;
@@ -288,8 +332,10 @@ public final class PlatformRestClientRegistry {
         }
     }
 
-    /// Minimal `HttpRequest` wrapper that substitutes a different URI while
-    /// delegating all other methods to the original request.
+    /**
+     * Minimal {@code HttpRequest} wrapper that substitutes a different URI while delegating all other methods to the
+     * original request.
+     */
     private static final class UriOverridingHttpRequest implements HttpRequest {
 
         private final HttpRequest delegate;

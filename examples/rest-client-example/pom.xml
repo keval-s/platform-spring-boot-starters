@@ -18,6 +18,7 @@
         <maven.compiler.target>26</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <spotless.plugin.version>3.6.0</spotless.plugin.version>
     </properties>
 
@@ -64,7 +65,7 @@
                         <palantirJavaFormat>
                             <version>2.91.0</version>
                             <style>PALANTIR</style>
-                            <formatJavadoc>false</formatJavadoc>
+                            <formatJavadoc>true</formatJavadoc>
                         </palantirJavaFormat>
 
                         <removeUnusedImports/>
@@ -77,6 +78,28 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.plugin.version}</version>
+                <configuration>
+                    <!-- Use multiModuleProjectDirectory to safely find the root folder -->
+                    <configLocation>${maven.multiModuleProjectDirectory}/.config/checkstyle/checkstyle.xml
+                    </configLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase> <!-- Fails the build early if styling is off -->
                         <goals>
                             <goal>check</goal>
                         </goals>

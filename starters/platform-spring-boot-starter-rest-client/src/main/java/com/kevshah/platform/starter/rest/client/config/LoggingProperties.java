@@ -2,34 +2,37 @@ package com.kevshah.platform.starter.rest.client.config;
 
 import java.util.List;
 
-/// Request/response logging configuration for a REST client or a single endpoint.
-///
-/// All fields are optional (`null` means "not configured"). At the client level, `null`
-/// fields are treated as their effective defaults: `enabled` → `false`, `level` → `INFO`,
-/// `request` and `response` → no payload or header logging. At the endpoint level, `null`
-/// fields inherit the client-level setting via [LoggingProperties#merge].
-///
-/// @param enabled  Whether to emit request and response log entries for this scope. Defaults
-///                 to `false` when `null` at the client level, or inherits the client-level
-///                 value at the endpoint level.
-/// @param level    SLF4J log level for the emitted entries. Accepted values (case-insensitive):
-///                 `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`. Defaults to `INFO` when `null`.
-/// @param request  Request logging settings. When `null`, no request payload or headers are
-///                 logged beyond the basic structured fields.
-/// @param response Response logging settings. When `null`, no response payload or headers are
-///                 logged beyond the basic structured fields.
+/**
+ * Request/response logging configuration for a REST client or a single endpoint.
+ *
+ * <p>All fields are optional ({@code null} means "not configured"). At the client level, {@code null} fields are
+ * treated as their effective defaults: {@code enabled} &rarr; {@code false}, {@code level} &rarr; {@code INFO},
+ * {@code request} and {@code response} &rarr; no payload or header logging. At the endpoint level, {@code null} fields
+ * inherit the client-level setting via {@link LoggingProperties#merge}.
+ *
+ * @param enabled Whether to emit request and response log entries for this scope. Defaults to {@code false} when
+ *     {@code null} at the client level, or inherits the client-level value at the endpoint level.
+ * @param level SLF4J log level for the emitted entries. Accepted values (case-insensitive): {@code TRACE},
+ *     {@code DEBUG}, {@code INFO}, {@code WARN}, {@code ERROR}. Defaults to {@code INFO} when {@code null}.
+ * @param request Request logging settings. When {@code null}, no request payload or headers are logged beyond the basic
+ *     structured fields.
+ * @param response Response logging settings. When {@code null}, no response payload or headers are logged beyond the
+ *     basic structured fields.
+ */
 public record LoggingProperties(Boolean enabled, String level, RequestConfig request, ResponseConfig response) {
 
-    /// Merges two `LoggingProperties` instances, with `override` taking precedence over `base`.
-    ///
-    /// For each scalar field (`enabled`, `level`) a non-`null` value in `override` replaces the
-    /// corresponding field in `base`. Nested `RequestConfig` and `ResponseConfig` values are
-    /// merged shallowly — a non-`null` nested field in `override` replaces the corresponding
-    /// field in `base`. When both inputs are `null`, returns `null`.
-    ///
-    /// @param base     the client-level configuration; may be `null`
-    /// @param override the endpoint-level configuration; may be `null`
-    /// @return the merged configuration, or `null` when both inputs are `null`
+    /**
+     * Merges two {@code LoggingProperties} instances, with {@code override} taking precedence over {@code base}.
+     *
+     * <p>For each scalar field ({@code enabled}, {@code level}) a non-{@code null} value in {@code override} replaces
+     * the corresponding field in {@code base}. Nested {@code RequestConfig} and {@code ResponseConfig} values are
+     * merged shallowly &mdash; a non-{@code null} nested field in {@code override} replaces the corresponding field in
+     * {@code base}. When both inputs are {@code null}, returns {@code null}.
+     *
+     * @param base the client-level configuration; may be {@code null}
+     * @param override the endpoint-level configuration; may be {@code null}
+     * @return the merged configuration, or {@code null} when both inputs are {@code null}
+     */
     public static LoggingProperties merge(LoggingProperties base, LoggingProperties override) {
         if (base == null && override == null) {
             return null;
@@ -79,56 +82,72 @@ public record LoggingProperties(Boolean enabled, String level, RequestConfig req
                 override.headers() != null ? override.headers() : base.headers());
     }
 
-    /// Configuration for request logging settings.
-    ///
-    /// @param payload Request body logging settings. When `null`, the request body is not logged.
-    /// @param headers Request header logging settings. When `null`, no request headers are logged.
+    /**
+     * Configuration for request logging settings.
+     *
+     * @param payload Request body logging settings. When {@code null}, the request body is not logged.
+     * @param headers Request header logging settings. When {@code null}, no request headers are logged.
+     */
     public record RequestConfig(PayloadConfig payload, HeadersConfig headers) {}
 
-    /// Configuration for response logging settings.
-    ///
-    /// @param payload Response body logging settings. When `null`, the response body is not
-    ///                logged. Enabling payload logging buffers the entire response body in memory
-    ///                before it is handed to the deserialiser.
-    /// @param headers Response header logging settings. When `null`, no response headers are logged.
+    /**
+     * Configuration for response logging settings.
+     *
+     * @param payload Response body logging settings. When {@code null}, the response body is not logged. Enabling
+     *     payload logging buffers the entire response body in memory before it is handed to the deserializer.
+     * @param headers Response header logging settings. When {@code null}, no response headers are logged.
+     */
     public record ResponseConfig(PayloadConfig payload, HeadersConfig headers) {}
 
-    /// Configuration for payload (request or response body) logging.
-    ///
-    /// @param enabled Set to `true` to capture and include the payload in the log entry.
-    ///                When `false` or `null`, the payload is not logged.
+    /**
+     * Configuration for payload (request or response body) logging.
+     *
+     * @param enabled Set to {@code true} to capture and include the payload in the log entry. When {@code false} or
+     *     {@code null}, the payload is not logged.
+     */
     public record PayloadConfig(Boolean enabled) {
 
-        /// Returns `true` when payload logging is switched on.
+        /**
+         * Returns {@code true} when payload logging is switched on.
+         *
+         * @return {@code true} if enabled
+         */
         public boolean isEnabled() {
             return Boolean.TRUE.equals(enabled);
         }
     }
 
-    /// Configuration for header logging.
-    ///
-    /// @param enabled  Set to `true` to capture and include headers in the log entry.
-    ///                 When `false` or `null`, no headers are logged.
-    /// @param include  List of header names to include in the log entry. When empty or `null`,
-    ///                 all headers are included (subject to `enabled`).
-    /// @param exclude  List of header names to exclude from the log entry. When empty or `null`,
-    ///                 no headers are excluded. If a header appears in both `include` and
-    ///                 `exclude`, it is excluded.
+    /**
+     * Configuration for header logging.
+     *
+     * @param enabled Set to {@code true} to capture and include headers in the log entry. When {@code false} or
+     *     {@code null}, no headers are logged.
+     * @param include List of header names to include in the log entry. When empty or {@code null}, all headers are
+     *     included (subject to {@code enabled}).
+     * @param exclude List of header names to exclude from the log entry. When empty or {@code null}, no headers are
+     *     excluded. If a header appears in both {@code include} and {@code exclude}, it is excluded.
+     */
     public record HeadersConfig(Boolean enabled, List<String> include, List<String> exclude) {
 
-        /// Returns `true` when header logging is switched on.
+        /**
+         * Returns {@code true} when header logging is switched on.
+         *
+         * @return {@code true} if enabled
+         */
         public boolean isEnabled() {
             return Boolean.TRUE.equals(enabled);
         }
 
-        /// Returns `true` when the given header name should be logged according to the `include`
-        /// and `exclude` lists.
-        ///
-        /// Header name matching is case-insensitive. When `include` is empty or `null`, all
-        /// headers are included (subject to `enabled`), except those listed in `exclude`.
-        ///
-        /// @param headerName the HTTP header name to evaluate
-        /// @return `true` when the header should appear in the log entry
+        /**
+         * Returns {@code true} when the given header name should be logged according to the {@code include} and
+         * {@code exclude} lists.
+         *
+         * <p>Header name matching is case-insensitive. When {@code include} is empty or {@code null}, all headers are
+         * included (subject to {@code enabled}), except those listed in {@code exclude}.
+         *
+         * @param headerName the HTTP header name to evaluate
+         * @return {@code true} when the header should appear in the log entry
+         */
         public boolean shouldLogHeader(String headerName) {
             if (!isEnabled()) {
                 return false;

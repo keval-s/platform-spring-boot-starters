@@ -741,7 +741,7 @@ class RestClientLoggingInterceptorTest {
     // Stub
     // -------------------------------------------------------------------------
 
-    /// Minimal stub implementation of `HttpRequest` for use in interceptor tests.
+    /** Minimal stub implementation of {@code HttpRequest} for use in interceptor tests. */
     @NullMarked
     static final class StubHttpRequest implements org.springframework.http.HttpRequest {
 

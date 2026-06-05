@@ -9,24 +9,31 @@ import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestClient;
 
-/// Auto-configuration for `platform-spring-boot-starter-rest-client`.
-///
-/// Activates when `RestClient` is on the classpath (i.e. `spring-boot-starter-restclient`,
-/// `spring-boot-starter-web`, or `spring-boot-starter-webflux` is present).
-///
-/// Registers a single `PlatformRestClientRegistry` bean named
-/// `platformRestClientRegistry` that holds one pre-built [RestClient] and one
-/// [RetryTemplate] per entry declared under `platform.rest.client.clients`.
+/**
+ * Auto-configuration for {@code platform-spring-boot-starter-rest-client}.
+ *
+ * <p>Activates when {@code RestClient} is on the classpath (i.e. {@code spring-boot-starter-restclient},
+ * {@code spring-boot-starter-web}, or {@code spring-boot-starter-webflux} is present).
+ *
+ * <p>Registers a single {@code PlatformRestClientRegistry} bean named {@code platformRestClientRegistry} that holds one
+ * pre-built {@link RestClient} and one {@code RetryTemplate} per entry declared under
+ * {@code platform.rest.client.clients}.
+ */
 @AutoConfiguration
 @ConditionalOnClass(RestClient.class)
 @EnableConfigurationProperties(RestClientProperties.class)
 public class RestClientAutoConfiguration {
 
-    /// Creates and registers the `PlatformRestClientRegistry` bean.
-    ///
-    /// `SslBundles` is injected via `ObjectProvider`-style nullable parameter so that
-    /// the bean is still registered even when no SSL bundles are configured in the
-    /// application.
+    /**
+     * Creates and registers the {@code PlatformRestClientRegistry} bean.
+     *
+     * <p>{@code SslBundles} is injected via {@code ObjectProvider}-style nullable parameter so that the bean is still
+     * registered even when no SSL bundles are configured in the application.
+     *
+     * @param properties the bound {@code RestClientProperties} configuration
+     * @param sslBundlesProvider the provider for {@code SslBundles}
+     * @return a new {@code PlatformRestClientRegistry} instance
+     */
     @Bean("platformRestClientRegistry")
     public PlatformRestClientRegistry platformRestClientRegistry(
             RestClientProperties properties, ObjectProvider<SslBundles> sslBundlesProvider) {

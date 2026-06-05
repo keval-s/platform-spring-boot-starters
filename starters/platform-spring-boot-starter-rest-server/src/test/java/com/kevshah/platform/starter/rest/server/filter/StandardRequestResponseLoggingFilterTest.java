@@ -63,7 +63,7 @@ class StandardRequestResponseLoggingFilterTest {
         return new RestServerProperties(new LoggingProperties(false, null));
     }
 
-    /// Logging enabled globally with no rules – only basic request/response info is logged (no payloads).
+    /** Logging enabled globally with no rules &mdash; only basic request/response info is logged (no payloads). */
     private static RestServerProperties loggingEnabled() {
         return new RestServerProperties(new LoggingProperties(true, null));
     }
@@ -72,8 +72,10 @@ class StandardRequestResponseLoggingFilterTest {
         return new RestServerProperties(new LoggingProperties(true, rules));
     }
 
-    /// Simulates downstream reading the request body — with the new CachedBodyRequestWrapper
-    /// the body is pre-buffered, so the chain just reads from the replayable stream.
+    /**
+     * Simulates downstream reading the request body &mdash; with the new {@code CachedBodyRequestWrapper} the body is
+     * pre-buffered, so the chain just reads from the replayable stream.
+     */
     private void setupChainToReadRequestBody() throws Exception {
         doAnswer(invocation -> {
                     HttpServletRequest req = (HttpServletRequest) invocation.getArgument(0);
@@ -84,8 +86,10 @@ class StandardRequestResponseLoggingFilterTest {
                 .doFilter(any(), any());
     }
 
-    /// Simulates downstream writing `body` to the response so `ContentCachingResponseWrapper.getContentAsByteArray()`
-    /// returns content.
+    /**
+     * Simulates downstream writing {@code body} to the response so
+     * {@code ContentCachingResponseWrapper.getContentAsByteArray()} returns content.
+     */
     private void setupChainToWriteResponseBody(byte[] body) throws Exception {
         doAnswer(invocation -> {
                     ContentCachingResponseWrapper wrapped = (ContentCachingResponseWrapper) invocation.getArgument(1);

@@ -17,49 +17,52 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 
-/// `ClientHttpRequestInterceptor` that emits structured SLF4J log entries for outbound
-/// REST client calls.
-///
-/// The interceptor reads a [LoggingContext] from the `"platform.rest.client.logging-context"`
-/// request attribute, set by `PlatformRestClient` before each call. When no attribute is
-/// present, or `enabled` is not `true`, the request passes through without any additional
-/// overhead.
-///
-/// Two structured log entries are emitted per call when logging is enabled:
-///
-/// - **`REST client request`** — logged before the request is sent. Always includes
-///   `platform.rest-client.name`, `platform.rest-client.http.endpoint`,
-///   `platform.rest-client.http.method`, and `platform.rest-client.http.url`. Optionally
-///   includes `platform.rest-client.http.request.headers` (when `logHeaders` is `true`) and
-///   `platform.rest-client.http.request.body` (when `logRequestBody` is `true` and the body
-///   is non-empty).
-/// - **`REST client response`** — logged after the response is received. Always includes
-///   `platform.rest-client.name`, `platform.rest-client.http.endpoint`,
-///   `platform.rest-client.http.method`, `platform.rest-client.http.url`,
-///   `platform.rest-client.http.status`, and `platform.rest-client.http.duration_ms`.
-///   Optionally includes `platform.rest-client.http.response.headers` (when `logHeaders`
-///   is `true`) and `platform.rest-client.http.response.body` (when `logResponseBody` is `true`).
-///
-/// When `logResponseBody` is `true`, the entire response body is buffered in memory before
-/// it is returned to Spring's `RestClient` for deserialisation.
-///
-/// The log level for both entries is controlled by `LoggingProperties#level` and defaults
-/// to `INFO` when not configured.
+/**
+ * {@code ClientHttpRequestInterceptor} that emits structured SLF4J log entries for outbound REST client calls.
+ *
+ * <p>The interceptor reads a {@link LoggingContext} from the {@code "platform.rest.client.logging-context"} request
+ * attribute, set by {@code PlatformRestClient} before each call. When no attribute is present, or {@code enabled} is
+ * not {@code true}, the request passes through without any additional overhead.
+ *
+ * <p>Two structured log entries are emitted per call when logging is enabled:
+ *
+ * <ul>
+ *   <li><b>{@code REST client request}</b> &mdash; logged before the request is sent. Always includes
+ *       {@code platform.rest-client.name}, {@code platform.rest-client.http.endpoint},
+ *       {@code platform.rest-client.http.method}, and {@code platform.rest-client.http.url}. Optionally includes
+ *       {@code platform.rest-client.http.request.headers} (when {@code logHeaders} is {@code true}) and
+ *       {@code platform.rest-client.http.request.body} (when {@code logRequestBody} is {@code true} and the body is
+ *       non-empty).
+ *   <li><b>{@code REST client response}</b> &mdash; logged after the response is received. Always includes
+ *       {@code platform.rest-client.name}, {@code platform.rest-client.http.endpoint},
+ *       {@code platform.rest-client.http.method}, {@code platform.rest-client.http.url},
+ *       {@code platform.rest-client.http.status}, and {@code platform.rest-client.http.duration_ms}. Optionally
+ *       includes {@code platform.rest-client.http.response.headers} (when {@code logHeaders} is {@code true}) and
+ *       {@code platform.rest-client.http.response.body} (when {@code logResponseBody} is {@code true}).
+ * </ul>
+ *
+ * <p>When {@code logResponseBody} is {@code true}, the entire response body is buffered in memory before it is returned
+ * to Spring's {@code RestClient} for deserialization.
+ *
+ * <p>The log level for both entries is controlled by {@code LoggingProperties#level} and defaults to {@code INFO} when
+ * not configured.
+ */
 public final class RestClientLoggingInterceptor implements ClientHttpRequestInterceptor {
 
-    /// Request attribute key under which `PlatformRestClient` stores the [LoggingContext].
+    /** Request attribute key under which {@code PlatformRestClient} stores the {@link LoggingContext}. */
     public static final String ATTRIBUTE_KEY = "platform.rest.client.logging-context";
 
     private static final Logger log = LoggerFactory.getLogger(RestClientLoggingInterceptor.class);
 
-    /// Intercepts an outbound request, logging request and response details when logging
-    /// is enabled for the call.
-    ///
-    /// @param request   the outbound HTTP request
-    /// @param body      the serialised request body bytes
-    /// @param execution the request execution chain
-    /// @return the HTTP response, potentially wrapped for body buffering
-    /// @throws IOException if the request execution fails
+    /**
+     * Intercepts an outbound request, logging request and response details when logging is enabled for the call.
+     *
+     * @param request the outbound HTTP request
+     * @param body the serialized request body bytes
+     * @param execution the request execution chain
+     * @return the HTTP response, potentially wrapped for body buffering
+     * @throws IOException if the request execution fails
+     */
     @Override
     @NullMarked
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
@@ -131,8 +134,7 @@ public final class RestClientLoggingInterceptor implements ClientHttpRequestInte
             String responseBody,
             LoggingContext ctx,
             long durationMs,
-            Level level)
-            throws IOException {
+            Level level) {
         var config = ctx.config();
         var builder = log.atLevel(level)
                 .addKeyValue(HttpLoggingKeys.CLIENT_NAME, ctx.clientName())
@@ -206,9 +208,10 @@ public final class RestClientLoggingInterceptor implements ClientHttpRequestInte
         return filtered;
     }
 
-    /// Wraps a `ClientHttpResponse` and buffers the entire response body in memory,
-    /// allowing the body to be read twice — once here for logging and once by Spring's
-    /// `RestClient` for deserialisation.
+    /**
+     * Wraps a {@code ClientHttpResponse} and buffers the entire response body in memory, allowing the body to be read
+     * twice &mdash; once here for logging and once by Spring's {@code RestClient} for deserialization.
+     */
     @NullMarked
     private static final class BufferingClientHttpResponse implements ClientHttpResponse {
 
@@ -220,7 +223,11 @@ public final class RestClientLoggingInterceptor implements ClientHttpRequestInte
             this.bufferedBody = StreamUtils.copyToByteArray(delegate.getBody());
         }
 
-        /// Returns the buffered response body as a UTF-8 string.
+        /**
+         * Returns the buffered response body as a UTF-8 string.
+         *
+         * @return the buffered response body as a UTF-8 string
+         */
         String getBodyAsString() {
             return new String(bufferedBody, StandardCharsets.UTF_8);
         }

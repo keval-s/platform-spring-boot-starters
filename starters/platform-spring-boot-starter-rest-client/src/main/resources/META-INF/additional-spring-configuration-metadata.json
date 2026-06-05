@@ -136,7 +136,7 @@
             "name": "platform.rest.client.clients[*].logging.request.payload.enabled",
             "type": "java.lang.Boolean",
             "sourceType": "com.kevshah.platform.starter.rest.client.config.LoggingProperties$PayloadConfig",
-            "description": "Whether to include the serialised request body in the request log entry. Defaults to false when absent.",
+            "description": "Whether to include the serialized request body in the request log entry. Defaults to false when absent.",
             "defaultValue": false
         },
         {

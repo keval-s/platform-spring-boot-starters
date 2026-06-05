@@ -124,22 +124,5 @@ class LoggingPropertiesTest {
             assertThat(result.response().headers().include()).isNull();
             assertThat(result.response().headers().exclude()).isNull();
         }
-
-        //        @Test
-        //        void merge_partialOverride_mixesBaseAndOverride() {
-        //            // Given
-        //            var base = new LoggingProperties(false, true, false, true, "INFO");
-        //            var override = new LoggingProperties(true, null, true, null, null);
-        //
-        //            // When
-        //            var result = LoggingProperties.merge(base, override);
-        //
-        //            // Then
-        //            assertThat(result.enabled()).isTrue();         // override wins
-        //            assertThat(result.requestBody()).isTrue();  // base fallback
-        //            assertThat(result.responseBody()).isTrue(); // override wins
-        //            assertThat(result.headers()).isTrue();      // base fallback
-        //            assertThat(result.level()).isEqualTo("INFO");  // base fallback
-        //        }
     }
 }

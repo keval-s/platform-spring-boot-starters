@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `spring-boot-configuration-processor` annotation processors
 - Added Lombok as a provided dependency to `platform-spring-boot-starter-build-parent`
 - Added `.sdkmanrc` with Java 26 + updated across all POMs
+- Added checkstyle plugin
 
 #### platform-spring-boot-starter-rest-server
 

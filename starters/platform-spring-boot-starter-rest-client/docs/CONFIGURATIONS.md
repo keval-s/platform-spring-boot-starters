@@ -100,11 +100,11 @@ corresponding client-level values — unset fields inherit from the client.
 |-------------------------------------|----------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `…logging.enabled`                  | `Boolean`      | `false` | Enables structured log entries for every request and response in this scope.                                                                            |
 | `…logging.level`                    | `String`       | `INFO`  | SLF4J log level for the emitted entries. Accepted values (case-insensitive): `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`.                                 |
-| `…logging.request.payload.enabled`  | `Boolean`      | `false` | Includes the serialised request body in the request log entry.                                                                                          |
+| `…logging.request.payload.enabled`  | `Boolean`      | `false` | Includes the serialized request body in the request log entry.                                                                                          |
 | `…logging.request.headers.enabled`  | `Boolean`      | `false` | Includes request headers in the request log entry.                                                                                                      |
 | `…logging.request.headers.include`  | `List<String>` | `—`     | Allowlist of request header names to log. When absent or empty, all headers are logged (subject to `exclude`).                                          |
 | `…logging.request.headers.exclude`  | `List<String>` | `—`     | Denylist of request header names to suppress. Takes precedence over `include`.                                                                          |
-| `…logging.response.payload.enabled` | `Boolean`      | `false` | Includes the response body in the response log entry. Enabling this buffers the entire response body in memory before it is handed to the deserialiser. |
+| `…logging.response.payload.enabled` | `Boolean`      | `false` | Includes the response body in the response log entry. Enabling this buffers the entire response body in memory before it is handed to the deserializer. |
 | `…logging.response.headers.enabled` | `Boolean`      | `false` | Includes response headers in the response log entry.                                                                                                    |
 | `…logging.response.headers.include` | `List<String>` | `—`     | Allowlist of response header names to log. When absent or empty, all headers are logged (subject to `exclude`).                                         |
 | `…logging.response.headers.exclude` | `List<String>` | `—`     | Denylist of response header names to suppress. Takes precedence over `include`.                                                                         |
@@ -239,7 +239,7 @@ platform:
 ```
 
 > **Memory note:** When `response.payload.enabled` is `true`, the entire response body is
-> buffered in memory before it is handed to the deserialiser. Avoid enabling this for
+> buffered in memory before it is handed to the deserializer. Avoid enabling this for
 > endpoints that return large payloads.
 
 ### Retry on specific status codes

@@ -1495,7 +1495,7 @@ class PlatformRestClientTest {
             var result =
                     registry.getPlatformRestClient("svc").get("get-item", Map.of("id", "item-2"), ItemResponse.class);
 
-            // Then — response body must be fully readable by the deserialiser after buffering for logging
+            // Then — response body must be fully readable by the deserializer after buffering for logging
             assertThat(result).isNotNull();
             assertThat(result.id()).isEqualTo("item-2");
         }

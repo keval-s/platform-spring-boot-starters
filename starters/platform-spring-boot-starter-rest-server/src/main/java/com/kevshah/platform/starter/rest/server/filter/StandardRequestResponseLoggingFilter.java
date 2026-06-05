@@ -32,41 +32,47 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
-/// Servlet filter that logs incoming HTTP requests and outgoing HTTP responses.
-///
-/// Logging behaviour is governed by [RestServerProperties] — it can be disabled globally or
-/// fine-tuned per path and HTTP method via [LoggingProperties.LoggingRule] entries.
-///
-/// Each rule may independently suppress or enable request/response logging via
-/// [LoggingProperties.RequestConfig] and [LoggingProperties.ResponseConfig], and can
-/// optionally include the payload body ([LoggingProperties.PayloadConfig]) or selected
-/// headers ([LoggingProperties.HeadersConfig]) in the log entry.
+/**
+ * Servlet filter that logs incoming HTTP requests and outgoing HTTP responses.
+ *
+ * <p>Logging behaviour is governed by {@link RestServerProperties} &mdash; it can be disabled globally or fine-tuned
+ * per path and HTTP method via {@link LoggingProperties.LoggingRule} entries.
+ *
+ * <p>Each rule may independently suppress or enable request/response logging via
+ * {@link LoggingProperties.RequestConfig} and {@link LoggingProperties.ResponseConfig}, and can optionally include the
+ * payload body ({@link LoggingProperties.PayloadConfig}) or selected headers ({@link LoggingProperties.HeadersConfig})
+ * in the log entry.
+ */
 @Slf4j
 public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
 
     private final RestServerProperties properties;
     private final JsonMapper jsonMapper;
 
-    /// Creates a new filter with the given server properties and JSON mapper.
-    ///
-    /// @param properties server-level configuration including the logging rules
-    /// @param jsonMapper mapper used to parse payload bodies into structured JSON for log output
+    /**
+     * Creates a new filter with the given server properties and JSON mapper.
+     *
+     * @param properties server-level configuration including the logging rules
+     * @param jsonMapper mapper used to parse payload bodies into structured JSON for log output
+     */
     public StandardRequestResponseLoggingFilter(RestServerProperties properties, JsonMapper jsonMapper) {
         this.properties = properties;
         this.jsonMapper = jsonMapper;
     }
 
-    /// Applies request/response logging around the filter chain for the current request.
-    ///
-    /// When request body logging is enabled the body is eagerly buffered by a
-    /// [CachedBodyRequestWrapper] so it can be included in that pre-chain log entry and later
-    /// replayed to downstream handlers (e.g. `@RequestBody` deserialisation).
-    ///
-    /// @param request     the current HTTP request
-    /// @param response    the current HTTP response
-    /// @param filterChain the remaining filter chain
-    /// @throws ServletException if a servlet error occurs during filter processing
-    /// @throws IOException      if an I/O error occurs during filter processing
+    /**
+     * Applies request/response logging around the filter chain for the current request.
+     *
+     * <p>When request body logging is enabled the body is eagerly buffered by a {@link CachedBodyRequestWrapper} so it
+     * can be included in that pre-chain log entry and later replayed to downstream handlers (e.g. {@code @RequestBody}
+     * deserialization).
+     *
+     * @param request the current HTTP request
+     * @param response the current HTTP response
+     * @param filterChain the remaining filter chain
+     * @throws ServletException if a servlet error occurs during filter processing
+     * @throws IOException if an I/O error occurs during filter processing
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -171,8 +177,15 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
                 .log("Outgoing HTTP response");
     }
 
-    /// Parses `raw` as JSON when possible and attaches it under `key`; falls back to the raw
-    /// string for non-JSON bodies (plain text, form data, etc.).
+    /**
+     * Parses {@code raw} as JSON when possible and attaches it under {@code key}; falls back to the raw string for
+     * non-JSON bodies (plain text, form data, etc.).
+     *
+     * @param builder the SLF4J logging event builder
+     * @param raw the raw string payload
+     * @param key the logging key to attach the payload to
+     * @return the updated logging event builder
+     */
     private org.slf4j.spi.LoggingEventBuilder addPayload(
             org.slf4j.spi.LoggingEventBuilder builder, String raw, String key) {
         try {
@@ -182,9 +195,16 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
         }
     }
 
-    /// Collects request headers that pass the [LoggingProperties.HeadersConfig] filter and
-    /// attaches them as a map under [HttpLoggingKeys.REQUEST_HEADERS].
-    /// Returns `builder` unchanged when no headers pass the filter or enumeration is unavailable.
+    /**
+     * Collects request headers that pass the {@link LoggingProperties.HeadersConfig} filter and attaches them as a map
+     * under {@link HttpLoggingKeys#REQUEST_HEADERS}. Returns {@code builder} unchanged when no headers pass the filter
+     * or enumeration is unavailable.
+     *
+     * @param builder the SLF4J logging event builder
+     * @param request the incoming HTTP request
+     * @param headersConfig the configured header inclusion/exclusion rules
+     * @return the updated logging event builder
+     */
     private LoggingEventBuilder addRequestHeaders(
             LoggingEventBuilder builder, HttpServletRequest request, LoggingProperties.HeadersConfig headersConfig) {
         var headerNames = request.getHeaderNames();
@@ -200,9 +220,16 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
         return headers.isEmpty() ? builder : builder.addKeyValue(HttpLoggingKeys.REQUEST_HEADERS, headers);
     }
 
-    /// Collects response headers that pass the [LoggingProperties.HeadersConfig] filter and
-    /// attaches them as a map under [HttpLoggingKeys.RESPONSE_HEADERS].
-    /// Returns `builder` unchanged when no headers pass the filter.
+    /**
+     * Collects response headers that pass the {@link LoggingProperties.HeadersConfig} filter and attaches them as a map
+     * under {@link HttpLoggingKeys#RESPONSE_HEADERS}. Returns {@code builder} unchanged when no headers pass the
+     * filter.
+     *
+     * @param builder the SLF4J logging event builder
+     * @param response the outgoing cached response wrapper
+     * @param headersConfig the configured header inclusion/exclusion rules
+     * @return the updated logging event builder
+     */
     private LoggingEventBuilder addResponseHeaders(
             LoggingEventBuilder builder,
             ContentCachingResponseWrapper response,
@@ -216,10 +243,16 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
         return headers.isEmpty() ? builder : builder.addKeyValue(HttpLoggingKeys.RESPONSE_HEADERS, headers);
     }
 
-    /// Finds the first [LoggingRule] whose `path` and `methods` match the given URI and HTTP method.
-    ///
-    /// Rules are evaluated in declaration order; the first match wins.
-    /// Returns an empty `Optional` when no rule matches.
+    /**
+     * Finds the first {@link LoggingRule} whose {@code path} and {@code methods} match the given URI and HTTP method.
+     *
+     * <p>Rules are evaluated in declaration order; the first match wins. Returns an empty {@code Optional} when no rule
+     * matches.
+     *
+     * @param uri the request URI path
+     * @param method the HTTP method of the request
+     * @return an {@code Optional} containing the matched {@code LoggingRule}, or empty if none match
+     */
     private Optional<LoggingRule> findFirstMatchingRule(String uri, String method) {
         List<LoggingRule> rules = properties.logging().rules();
         if (rules == null || rules.isEmpty()) {
@@ -235,12 +268,14 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
                 .findFirst();
     }
 
-    /// `HttpServletRequestWrapper` that eagerly reads the entire request body into an in-memory
-    /// buffer on construction, then replays it from the buffer on every subsequent
-    /// `getInputStream` or `getReader` call.
-    ///
-    /// This allows the body to be logged before the filter chain runs while still being
-    /// fully available to downstream handlers such as `@RequestBody` deserialisation.
+    /**
+     * {@code HttpServletRequestWrapper} that eagerly reads the entire request body into an in-memory buffer on
+     * construction, then replays it from the buffer on every subsequent {@code getInputStream} or {@code getReader}
+     * call.
+     *
+     * <p>This allows the body to be logged before the filter chain runs while still being fully available to downstream
+     * handlers such as {@code @RequestBody} deserialization.
+     */
     private static final class CachedBodyRequestWrapper extends HttpServletRequestWrapper {
 
         private final byte[] body;
@@ -250,13 +285,21 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
             this.body = request.getInputStream().readAllBytes();
         }
 
-        /// Returns the eagerly buffered request body bytes.
+        /**
+         * Returns the eagerly buffered request body bytes.
+         *
+         * @return the byte array containing the cached request body
+         */
         byte[] getCachedBody() {
             return body;
         }
 
-        /// Returns a fresh `ServletInputStream` backed by the buffered body on every call,
-        /// allowing the body to be read any number of times.
+        /**
+         * Returns a fresh {@code ServletInputStream} backed by the buffered body on every call, allowing the body to be
+         * read any number of times.
+         *
+         * @return a fresh {@code ServletInputStream} reading from the cached body
+         */
         @Override
         public ServletInputStream getInputStream() {
             var stream = new ByteArrayInputStream(body);
@@ -283,7 +326,11 @@ public class StandardRequestResponseLoggingFilter extends OncePerRequestFilter {
             };
         }
 
-        /// Returns a `BufferedReader` over the buffered body, respecting the request character encoding.
+        /**
+         * Returns a {@code BufferedReader} over the buffered body, respecting the request character encoding.
+         *
+         * @return a {@code BufferedReader} reading the cached body
+         */
         @Override
         public BufferedReader getReader() {
             String encoding = getCharacterEncoding();

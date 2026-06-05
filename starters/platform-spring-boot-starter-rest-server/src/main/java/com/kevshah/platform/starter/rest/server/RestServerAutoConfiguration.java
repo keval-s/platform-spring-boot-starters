@@ -9,22 +9,25 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import tools.jackson.databind.json.JsonMapper;
 
-/// Auto-configuration for `platform-spring-boot-starter-rest-server`.
-///
-/// Activates only in a web application context and registers platform-level
-/// REST server infrastructure beans. Configuration is bound from the
-/// `platform.rest.server` prefix via [RestServerProperties].
+/**
+ * Autoconfiguration for {@code platform-spring-boot-starter-rest-server}.
+ *
+ * <p>Activates only in a web application context and registers platform-level REST server infrastructure beans.
+ * Configuration is bound from the {@code platform.rest.server} prefix via {@link RestServerProperties}.
+ */
 @AutoConfiguration
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(RestServerProperties.class)
 public class RestServerAutoConfiguration {
 
-    /// Registers the [StandardRequestResponseLoggingFilter] bean when request/response
-    /// logging is explicitly enabled via `platform.rest.server.logging.enabled=true`.
-    ///
-    /// @param properties  the bound REST server configuration properties
-    /// @param jsonMapper  the Jackson `JsonMapper` used to serialise log output
-    /// @return a configured `StandardRequestResponseLoggingFilter` instance
+    /**
+     * Registers the {@link StandardRequestResponseLoggingFilter} bean when request/response logging is explicitly
+     * enabled via {@code platform.rest.server.logging.enabled=true}.
+     *
+     * @param properties the bound REST server configuration properties
+     * @param jsonMapper the Jackson {@code JsonMapper} used to serialize log output
+     * @return a configured {@code StandardRequestResponseLoggingFilter} instance
+     */
     @Bean
     @ConditionalOnProperty(prefix = "platform.rest.server.logging", name = "enabled", havingValue = "true")
     public StandardRequestResponseLoggingFilter standardRequestResponseLoggingFilter(
