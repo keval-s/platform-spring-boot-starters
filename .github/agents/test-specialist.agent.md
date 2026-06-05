@@ -15,10 +15,7 @@ tests that strictly conform to this project's architecture.
 
 ## Your Source of Truth
 
-You must base all your code generation, framework choices, and formatting on the rules defined in the following skill
-document. **Read it before generating any code:**
-
-* **File:** `.agents/skills/write-tests/SKILL.md` (or `@workspace #file:SKILL.md` if invoked via chat).
+All code generation, framework choices, and formatting are governed by the `write-tests` skill.
 
 ## Execution Rules
 
@@ -30,5 +27,4 @@ document. **Read it before generating any code:**
    rules defined in the skill document.
 3. **Run Tests:** Run `mvn test` from the project root to ensure all tests pass successfully. If any test fails, notify
    the user with the failure details and ask for confirmation before proceeding to fix the issues.
-4. **Verify:** Before finalizing your response, silently review your code against the Checklist at the bottom of the
-   `SKILL.md` file.
+4. **Verify:** Before finalizing your response, silently review your code against the Checklist in the `write-tests` skill.
