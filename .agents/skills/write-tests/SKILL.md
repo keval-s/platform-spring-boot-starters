@@ -151,6 +151,25 @@ verify(userRepository).save(user);
 verify(eventPublisher, never()).publish(any());
 ```
 
+#### Argument Captors
+
+Use `ArgumentCaptor` to assert on values passed into void collaborators.
+
+```java
+@Captor
+ArgumentCaptor<User> userCaptor;
+
+@Test
+void save_validInput_persistsUser() {
+  // When
+  userService.save("Alice");
+
+  // Then
+  verify(userRepository).save(userCaptor.capture());
+  assertThat(userCaptor.getValue().name()).isEqualTo("Alice");
+}
+```
+
 Imports to use:
 
 ```java
@@ -159,6 +178,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 ```
 
 ### Assertions with AssertJ
@@ -595,11 +616,80 @@ class UserServiceTest {
 
 ---
 
-## 9. Quick-Reference Checklist
+## 9. Structured Log Output Tests
+
+Use Logback's `ListAppender<ILoggingEvent>` to capture log events and assert on SLF4J
+key-value pairs emitted by the class under test.
+
+```java
+ch.qos.logback.classic.Logger logger;
+ListAppender<ILoggingEvent> listAppender;
+
+@BeforeEach
+void setUp() {
+    logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ClassUnderTest.class);
+    logger.setLevel(Level.DEBUG);
+    listAppender = new ListAppender<>();
+    listAppender.start();
+    logger.addAppender(listAppender);
+}
+
+@AfterEach
+void tearDown() {
+    logger.detachAppender(listAppender);
+}
+```
+
+Assert specific log keys and values:
+```java
+var event = listAppender.list.stream()
+        .filter(e -> "Incoming HTTP request".equals(e.getMessage()))
+        .findFirst()
+        .orElseThrow();
+var keys = event.getKeyValuePairs().stream().map(kvp -> kvp.key).toList();
+assertThat(keys).containsExactlyInAnyOrder(
+        "platform.rest-server.http.request.method",
+        "platform.rest-server.http.request.url");
+```
+
+---
+
+## 10. Servlet / Filter Tests
+
+Use `MockHttpServletRequest` and `MockHttpServletResponse` from `spring-test` to exercise
+`Filter` implementations without starting a servlet container. Use `doAnswer` to simulate
+downstream filter-chain behaviour (reading request bodies, writing response bodies):
+
+```java
+// Simulate downstream consuming the request body
+doAnswer(invocation -> {
+            HttpServletRequest req = (HttpServletRequest) invocation.getArgument(0);
+            req.getInputStream().readAllBytes();
+            return null;
+        })
+        .when(filterChain)
+        .doFilter(any(), any());
+
+// Simulate downstream writing a response body
+doAnswer(invocation -> {
+            ContentCachingResponseWrapper resp = (ContentCachingResponseWrapper) invocation.getArgument(1);
+            resp.getOutputStream().write("{\"orderId\":1}".getBytes());
+            return null;
+        })
+        .when(filterChain)
+        .doFilter(any(), any());
+```
+
+Use `ArgumentCaptor<HttpServletRequest>` to assert which request object was forwarded to the chain
+(e.g., original vs. wrapped).
+
+---
+
+## 11. Quick-Reference Checklist
 
 Before committing a test, verify:
 
-- [ ] Class name ends in `Test` (unit) or `IT` / `IntegrationTest` (integration).
+- [ ] Class name ends in `Test` (unit) or `IntegrationTest` (integration).
 - [ ] Method name follows `<behaviour>_<state>_<outcome>` convention.
 - [ ] Every test body has `// Given`, `// When`, `// Then` (or `// When/Then`) comments.
 - [ ] Assertions use AssertJ — no JUnit `assertEquals` / `assertTrue` calls.
