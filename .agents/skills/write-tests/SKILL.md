@@ -6,7 +6,7 @@ description: Guide for writing unit and integration tests following project conv
 ## Overview
 
 All tests are written using **JUnit 6 (Jupiter)**, **AssertJ** for fluent assertions, and
-**Mockito** for mocking. Tests are organised into two categories:
+**Mockito** for mocking. Tests are organized into two categories:
 
 - **Unit tests** — test a single class in isolation; dependencies are mocked with Mockito.
 - **Integration tests** — test the wired-up Spring context; use `@SpringBootTest` and

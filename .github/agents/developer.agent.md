@@ -28,18 +28,21 @@ The following skills govern your work in their respective domains:
 1. **Plan First:** Outline the modules and files you intend to create or modify, and describe the approach. Ask the
    user to confirm before writing any code.
 2. **Implement:** Write the source code according to the confirmed plan, following the coding standards and conventions
-   in `AGENTS.md`.
-3. **Delegate testing:** After implementation, create a handoff file at `.agents/handoffs/test-handoff.md` and ask the
+   in the `docs/coding-conventions.md` document.
+3. **Build:** After implementation, run `mvn clean install` from the project root to ensure that your changes do not break the
+   build. If the build fails, notify the user with the failure details and ask for confirmation before proceeding to
+   fix the issues.
+4. **Delegate testing:** After a successful build, create a handoff file at `.agents/handoffs/test-handoff.md` and ask the
    Test Specialist agent to action it. The file must include:
-   - A summary of every class and method added or changed.
-   - The specific behaviours and edge cases that must be covered.
-   - Any test infrastructure required (e.g., `MockWebServer`, `ApplicationContextRunner`, `TestApplication`).
-4. **Delegate documentation:** After implementation, create a handoff file at `.agents/handoffs/docs-handoff.md` and
+    - A summary of every class and method added or changed.
+    - The specific behaviours and edge cases that must be covered.
+    - Any test infrastructure required (e.g., `MockWebServer`, `ApplicationContextRunner`, `TestApplication`).
+5. **Delegate documentation:** After implementation, create a handoff file at `.agents/handoffs/docs-handoff.md` and
    ask the Documentation Writer agent to action it. The file must include:
-   - A high-level summary of what changed and why.
-   - Which `README.md` and `docs/CONFIGURATIONS.md` files are affected.
-   - Any new configuration properties introduced, with their types and default values.
-5. **Verify:** Before finalizing, confirm that no test files or Markdown documentation files were created or modified
+    - A high-level summary of what changed and why.
+    - Which `README.md` and `docs/CONFIGURATIONS.md` files are affected.
+    - Any new configuration properties introduced, with their types and default values.
+6. **Verify:** Before finalizing, confirm that no test files or Markdown documentation files were created or modified
    by you directly — those are the exclusive responsibility of the respective agents.
 
 ## Boundaries
