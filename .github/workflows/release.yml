@@ -27,12 +27,6 @@ jobs:
           server-id: 'github' # Matches `id` in pom.xml `distributionManagement`
           settings-path: ${{ github.workspace }}
 
-      - name: Inspect generated settings.xml
-        run: |
-          echo "Inspecting ${{ github.workspace }}/settings.xml"
-          # This will print the file, but GITHUB_TOKEN will be masked by GitHub Actions
-          grep -A 5 "<server>" ${{ github.workspace }}/settings.xml
-
       - name: Configure Git
         run: |
           git config --global user.name 'github-actions[bot]'
