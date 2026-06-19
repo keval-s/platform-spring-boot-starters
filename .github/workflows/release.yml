@@ -1,0 +1,88 @@
+name: Release and Publish Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g., 1.0.0)"
+        required: true
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: 26
+          distribution: 'temurin'
+          server-id: 'github' # Matches `id` in pom.xml `distributionManagement`
+          settings-path: ${{ github.workspace }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Run Version Update Script
+        run: ./scripts/version-update.sh ${{ github.event.inputs.version }}
+
+      - name: Commit and Tag
+        run: |
+          git add .
+          git commit -m "chore: release ${{ github.event.inputs.version }}"
+          git tag v${{ github.event.inputs.version }}
+          git push origin main --tags
+
+      - name: Publish to GitHub Packages
+        run: mvn --batch-mode deploy -DskipTests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        run: |
+          # 1. Extract the specific version section from CHANGELOG.md
+          # It captures lines starting from ## [VERSION] until the next ## [
+          VERSION=${{ github.event.inputs.version }}
+          BODY=$(sed -n "/## \[$VERSION]/,/## \[/p" CHANGELOG.md | sed '$d')
+          
+          # 2. Get the last tag to generate a commit diff
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGELOG_DIFF=$(git log $PREVIOUS_TAG..HEAD --oneline --pretty=format:"* %s")
+            FULL_BODY="$BODY"$'\n\n### Commit History\n\n'"$CHANGELOG_DIFF"
+          else
+            FULL_BODY="$BODY"
+          fi
+          
+          # 3. Create the release
+          gh release create v$VERSION \
+            --title "Release $VERSION" \
+            --notes "$FULL_BODY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump to Next Snapshot Version
+        run: |
+          # Simple logic to increment the patch version and append -SNAPSHOT
+          # This assumes your version format is X.Y.Z
+          VERSION=${{ github.event.inputs.version }}
+          MAJOR_MINOR_PATCH=${VERSION%.*}
+          PATCH=${VERSION##*.}
+          NEXT_PATCH=$((PATCH + 1))
+          NEXT_VERSION="${MAJOR_MINOR_PATCH}.${NEXT_PATCH}-SNAPSHOT"
+          
+          echo "Bumping to next version: $NEXT_VERSION"
+          ./scripts/version-update.sh $NEXT_VERSION
+          
+          # Commit the new snapshot version
+          git add .
+          git commit -m "chore: bump to next development version $NEXT_VERSION [skip ci]"
+          git push origin main

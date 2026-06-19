@@ -14,8 +14,11 @@
         <java.version>26</java.version>
         <maven.compiler.source>26</maven.compiler.source>
         <maven.compiler.target>26</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!--Skip deploy-->
         <maven.deploy.skip>true</maven.deploy.skip>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <modules>
@@ -26,6 +29,13 @@
         <module>starters/platform-spring-boot-starter-rest-client</module>
         <module>starters/platform-spring-boot-starter-rest-server</module>
     </modules>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/keval-s/platform-spring-boot-starters</url>
+        </repository>
+    </distributionManagement>
 
     <profiles>
         <profile>

@@ -47,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Lombok as a provided dependency to `platform-spring-boot-starter-build-parent`
 - Added `.sdkmanrc` with Java 26 + updated across all POMs
 - Added checkstyle plugin
+- Added `scripts/version-update.sh` for lockstep version updates across modules and changelog updates
+- Added GitHub workflow for creating/publishing releases and version updates using the above script
 
 #### platform-spring-boot-starter-rest-server
 
