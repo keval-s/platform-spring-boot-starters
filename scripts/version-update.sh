@@ -20,10 +20,15 @@ CHANGELOG="$PROJECT_ROOT/CHANGELOG.md"
 cd "$PROJECT_ROOT" || exit 1
 
 echo "--- Updating Maven POM versions to $NEW_VERSION ---"
-# Update versions in all pom.xml files
-mvn versions:set -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false -DprocessAllModules=true
-# Update the specific property in the BOM module
-mvn versions:set-property -pl :platform-spring-boot-starter-dependencies -Dproperty=platform.version -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false
+
+# Only update if the current pom version is different
+CURRENT_POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+if [ "$CURRENT_POM_VERSION" != "$NEW_VERSION" ]; then
+    mvn versions:set -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false -DprocessAllModules=true
+    mvn versions:set-property -pl :platform-spring-boot-starter-dependencies -Dproperty=platform.version -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false
+else
+    echo "Version is already set to $NEW_VERSION. Skipping."
+fi
 
 echo "--- Promoting Unreleased changes in CHANGELOG.md ---"
 # Check if the version is NOT a snapshot version
