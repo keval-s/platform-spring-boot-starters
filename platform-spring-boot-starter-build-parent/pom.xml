@@ -13,7 +13,7 @@
 
     <groupId>com.kevshah</groupId>
     <artifactId>platform-spring-boot-starter-build-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>pom</packaging>
     <description>Internal build parent</description>
 
@@ -36,7 +36,7 @@
             <dependency>
                 <groupId>com.kevshah</groupId>
                 <artifactId>platform-spring-boot-starter-dependencies</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>0.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

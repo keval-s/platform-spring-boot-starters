@@ -6,7 +6,7 @@
 
     <groupId>com.kevshah</groupId>
     <artifactId>platform-spring-boot-starter-dependencies</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>pom</packaging>
     <description>Bill of materials (BOM) for Spring Boot starters</description>
 
@@ -16,7 +16,7 @@
         <maven.compiler.source>26</maven.compiler.source>
         <maven.compiler.target>26</maven.compiler.target>
 
-        <platform.version>1.0.0-SNAPSHOT</platform.version>
+        <platform.version>0.1.0</platform.version>
 
         <resilience4j.version>2.4.0</resilience4j.version>
         <spring-boot.version>4.0.6</spring-boot.version>
