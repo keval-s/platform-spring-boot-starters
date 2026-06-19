@@ -13,7 +13,7 @@
 
     <groupId>com.kevshah</groupId>
     <artifactId>platform-spring-boot-starter-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Consumer-usable parent POM for Spring Boot starters</description>
 
@@ -36,7 +36,7 @@
             <dependency>
                 <groupId>com.kevshah</groupId>
                 <artifactId>platform-spring-boot-starter-dependencies</artifactId>
-                <version>0.1.0</version>
+                <version>0.1.1-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
