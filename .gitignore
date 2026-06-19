@@ -9,6 +9,8 @@ buildNumber.properties
 .mvn/timing.properties
 # Optional: keep the wrapper but ignore its binary jar if desired
 !.mvn/wrapper/maven-wrapper.jar
+settings.xml
+toolchains.xml
 
 ### IntelliJ IDEA ###
 .idea/
