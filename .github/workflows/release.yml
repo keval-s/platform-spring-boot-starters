@@ -57,7 +57,7 @@ jobs:
           git push origin main --tags
 
       - name: Publish to GitHub Packages
-        run: mvn --batch-mode deploy -DskipTests
+        run: mvn --batch-mode deploy -DskipTests -s ${{ github.workspace }}/settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
