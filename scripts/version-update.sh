@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script updates the version in all Maven POM files
+# and promotes the "Unreleased" section in CHANGELOG.md to the new version with the current date.
+
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
